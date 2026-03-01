@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RailRip - Anticheat Bypass as a Service</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Open+Sans:wght@400;600&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- Global Variables & Reset --- */
+        :root {
+            --bg-main: #1A1E2E;
+            --bg-secondary: #252a40;
+            --accent-cyan: #00FFC2;
+            --accent-gold: #FFD700;
+            --accent-red: #FF5F56;
+            --text-light: #ffffff;
+            --text-dim: #a0aec0;
+            --track-color: #3E4C6A;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; font-weight: 700; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .section-pad { padding: 80px 0; }
+        .highlight {
+            color: var(--bg-main);
+            background: var(--accent-cyan);
+            padding: 2px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            transform: skew(-5deg);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: var(--accent-cyan);
+            color: var(--bg-main);
+            box-shadow: 0 4px 15px rgba(0, 255, 194, 0.3);
+        }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 255, 194, 0.5); }
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            margin-left: 10px;
+        }
+        .btn-secondary:hover { background: rgba(0, 255, 194, 0.1); }
+
+        /* Scroll Animation Classes */
+        .hidden { opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
+        .show { opacity: 1; transform: translateY(0); }
+
+        /* --- Header --- */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
+        .logo { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.5rem; display: flex; align-items: center; }
+        .logo i { color: var(--accent-cyan); margin-right: 10px; }
+        nav ul { display: flex; gap: 30px; }
+        nav a { font-weight: 600; font-size: 0.9rem; transition: color 0.3s; }
+        nav a:hover { color: var(--accent-cyan); }
+
+        /* --- Hero Section --- */
+        #hero { min-height: 80vh; display: flex; align-items: center; position: relative; overflow: hidden; }
+        .hero-content { max-width: 700px; z-index: 2; }
+        h1 { font-size: 3.5rem; line-height: 1.2; margin-bottom: 20px; }
+        .subheader { font-size: 1.2rem; color: var(--text-dim); margin-bottom: 40px; }
+
+        .track-bg {
+            position: absolute; width: 200%; height: 100%; top: 60%; left: -50%;
+            background: repeating-linear-gradient(90deg, var(--track-color) 0px, var(--track-color) 20px, transparent 20px, transparent 40px);
+            opacity: 0.1; transform: rotate(-10deg); animation: trackMove 20s linear infinite;
+        }
+        @keyframes trackMove { 0% { background-position: 0 0; } 100% { background-position: 1000px 0; } }
+
+        .train-animation-container {
+            position: absolute; top: 30%; right: 5%; width: 450px; height: 100px;
+            display: flex; align-items: center; justify-content: space-between; pointer-events: none;
+        }
+        .station { font-size: 60px; color: var(--track-color); position: relative; z-index: 2; }
+        .station-label {
+            position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%);
+            font-size: 12px; font-family: monospace; color: var(--accent-cyan); white-space: nowrap;
+        }
+        .data-train {
+            font-size: 40px; color: var(--accent-cyan); position: absolute; z-index: 3;
+            animation: cloudCommute 5s infinite ease-in-out;
+        }
+        .train-track-line {
+            position: absolute; top: 50%; left: 40px; right: 40px; height: 4px;
+            background: repeating-linear-gradient(90deg, var(--track-color) 0px, var(--track-color) 10px, transparent 10px, transparent 20px);
+            transform: translateY(-50%); z-index: 1;
+        }
+        @keyframes cloudCommute {
+            0% { left: 60px; transform: scaleX(1); } 45% { left: 340px; transform: scaleX(1); }
+            50% { left: 340px; transform: scaleX(-1); } 95% { left: 60px; transform: scaleX(-1); }
+            100% { left: 60px; transform: scaleX(1); }
+        }
+
+        .rail-separator { text-align: center; color: var(--track-color); font-size: 2rem; margin: -20px 0; opacity: 0.3; }
+
+        /* --- Academic Backing --- */
+        .academic-box {
+            background: rgba(0, 255, 194, 0.05); border-left: 4px solid var(--accent-cyan);
+            padding: 30px; border-radius: 0 10px 10px 0; margin-bottom: 60px;
+        }
+        .academic-box h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: var(--accent-cyan); }
+        .academic-box p { font-size: 1rem; line-height: 1.6; color: var(--text-dim); margin-bottom: 10px; }
+
+        /* --- Who Is It For --- */
+        .who-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+        .result-box {
+            background: var(--bg-secondary); border: 1px solid var(--track-color);
+            padding: 30px; border-radius: 10px; position: relative;
+        }
+        .result-box i { color: var(--accent-cyan); font-size: 2rem; margin-bottom: 15px; }
+
+        /* --- Architecture Diagram --- */
+        .diagram-container { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 60px; position: relative; }
+        .diagram-step { text-align: center; flex: 1; position: relative; z-index: 2; background: var(--bg-main); padding: 20px; }
+        .step-icon {
+            width: 80px; height: 80px; background: var(--bg-secondary); border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2rem;
+            color: var(--accent-cyan); border: 2px solid var(--track-color);
+        }
+        .diagram-connector {
+            position: absolute; top: 60px; left: 15%; width: 70%; height: 4px;
+            background: var(--track-color); z-index: 1; overflow: hidden;
+        }
+        .diagram-connector::after {
+             content: ''; position: absolute; top: 0; left: 0; width: 30%; height: 100%;
+             background: var(--accent-cyan); animation: connectionFlow 3s linear infinite;
+        }
+        @keyframes connectionFlow { 0% { left: -30%; } 100% { left: 100%; } }
+
+        /* --- Capabilities Sections --- */
+        .capabilities-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 40px; margin-bottom: 80px;
+        }
+        .cap-card {
+            background: var(--bg-secondary); padding: 25px; border-radius: 12px;
+            border-top: 3px solid var(--accent-cyan);
+        }
+        .cap-card h4 { display: flex; align-items: center; gap: 10px; margin-bottom: 15px;}
+        .cap-card i { color: var(--accent-gold); }
+
+        /* --- API Showcase (Editor + Demo) --- */
+        .showcase-layout {
+            display: grid; 
+            /* Make the widget larger than the code snippet */
+            grid-template-columns: 1.2fr 1.8fr; 
+            gap: 40px; align-items: stretch; margin-top: 40px;
+        }
+
+        /* The Code Editor */
+        .editor-container {
+            background: #0f111a; border-radius: 8px; border: 1px solid #333;
+            overflow: hidden; display: flex; flex-direction: column; font-family: 'Fira Code', monospace;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); height: 100%; min-height: 400px;
+        }
+        .editor-header {
+            background: #1e2233; padding: 10px 15px; display: flex; align-items: center; border-bottom: 1px solid #333;
+        }
+        .editor-dots { display: flex; gap: 6px; margin-right: 15px; }
+        .editor-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .editor-tab { color: #a0aec0; font-size: 0.85rem; }
+        .editor-content { padding: 20px; font-size: 0.9rem; line-height: 1.6; color: #a0aec0; }
+        
+        /* Syntax highlighting colors */
+        .sy-keyword { color: #c678dd; }
+        .sy-obj { color: #e5c07b; }
+        .sy-prop { color: #61afef; }
+        .sy-str { color: #98c379; }
+        .sy-comment { color: #5c6370; font-style: italic; }
+        .sy-op { color: #56b6c2; }
+        
+        .cursor-blink {
+            display: inline-block; width: 8px; height: 15px; background: var(--accent-cyan);
+            animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* The Game Widget (Windows 11 Style) */
+        .win11-widget {
+            background: #202020; border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            overflow: hidden; display: flex; flex-direction: column; border: 1px solid #444; height: 100%; min-height: 400px;
+        }
+        .win11-header {
+            height: 32px; background: #1a1a1a; display: flex; justify-content: space-between; align-items: center; 
+            padding-left: 15px; user-select: none;
+        }
+        .win11-title {
+            font-size: 12px; color: #ccc; display: flex; align-items: center; gap: 8px; font-family: 'Segoe UI', sans-serif;
+        }
+        .win11-controls { display: flex; height: 100%; }
+        .win11-btn { 
+            width: 46px; height: 100%; display: flex; justify-content: center; align-items: center; color: #ccc; font-size: 10px; transition: 0.2s;
+        }
+        .win11-btn:hover { background: #333; }
+        .win11-btn.close:hover { background: #e81123; color: white; }
+        
+        /* Top-Down Game Container */
+        .game-screen {
+            flex-grow: 1; background-color: #2b3a31; position: relative; overflow: hidden;
+            background-image: linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* Moving ground particles */
+        .game-particle {
+            position: absolute; width: 4px; height: 4px; background: rgba(255, 255, 255, 0.2); border-radius: 50%;
+        }
+
+        /* The Player (always centered) */
+        .game-player {
+            position: absolute; top: 50%; left: 50%; width: 34px; height: 34px;
+            background: #00FFC2; border-radius: 50%; transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px rgba(0, 255, 194, 0.5); z-index: 10;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .game-player::after {
+            content: ''; position: absolute; top: -5px; left: 12px; width: 10px; height: 10px;
+            background: #fff; border-radius: 50%; border: 2px solid #333;
+        }
+
+        .game-target {
+            position: absolute; width: 24px; height: 24px; border: 2px solid rgba(255, 215, 0, 0.8);
+            border-radius: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; pointer-events: none;
+            transition: all 0.2s ease-out; z-index: 5;
+        }
+        .game-target.active { transform: translate(-50%, -50%) scale(1); opacity: 1; animation: pulseTarget 1s infinite; }
+        @keyframes pulseTarget { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }
+
+        /* Fake Mouse Cursor */
+        .demo-cursor {
+            width: 24px; height: 24px; position: absolute; z-index: 20;
+            background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.65376 12.3673H5.46026L5.31717 12.4976L0.500002 16.8829L0.500002 1.19823L19.2641 12.3673H5.65376Z' fill='white' stroke='black'/%3E%3C/svg%3E");
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: none;
+            top: 20%; left: 20%;
+        }
+        .demo-cursor.clicking { transform: scale(0.8); }
+
+        /* --- Case Study & Pricing --- */
+        .case-study-box {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-main) 100%);
+            padding: 40px; border-radius: 20px; border: 1px solid var(--track-color);
+            display: flex; align-items: center; gap: 40px; margin-top: 50px;
+        }
+        .oryx-logo { font-size: 4rem; color: var(--accent-gold); }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 60px; }
+        .price-card {
+            background: var(--bg-secondary); padding: 40px 30px; border-radius: 15px;
+            text-align: center; border-top: 5px solid var(--track-color); transition: transform 0.3s; position: relative;
+        }
+        .price-card:hover { transform: translateY(-10px); }
+        .price-card.popular {
+            border-top: 5px solid var(--accent-cyan);
+            background: linear-gradient(180deg, rgba(0, 255, 194, 0.05) 0%, var(--bg-secondary) 100%);
+        }
+        .price-card.popular::before {
+            content: 'Most Popular'; position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            background: var(--accent-cyan); color: var(--bg-main); padding: 5px 15px; border-radius: 20px;
+            font-weight: 700; font-size: 0.8rem;
+        }
+        .price-title { font-size: 1.5rem; margin-bottom: 20px; }
+        .price-amount { font-size: 3rem; font-weight: 900; margin-bottom: 10px; color: var(--accent-cyan); }
+        .price-amount small { font-size: 1rem; color: var(--text-dim); font-weight: 400;}
+        .price-features { margin: 30px 0; text-align: left; }
+        .price-features li { margin-bottom: 15px; display: flex; align-items: flex-start; }
+        .price-features li i { color: var(--accent-cyan); margin-right: 10px; margin-top: 4px; }
+        footer { background: var(--bg-secondary); padding: 40px 0; text-align: center; margin-top: 100px; border-top: 3px dashed var(--track-color); }
+        .footer-links a { margin: 0 15px; color: var(--text-dim); font-size: 0.9rem;}
+
+        @media (max-width: 968px) {
+            h1 { font-size: 2.5rem; }
+            .who-grid, .showcase-layout, .capabilities-grid, .pricing-grid { grid-template-columns: 1fr; gap: 30px;}
+            .diagram-container { flex-direction: column; align-items: center; }
+            .diagram-connector { display: none; }
+            .diagram-step { margin-bottom: 40px; width: 100%;}
+            .train-animation-container { display: none; }
+            .case-study-box { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="logo"><i class="fas fa-train-subway"></i> RailRip</div>
+            <nav>
+                <ul>
+                    <li><a href="#who-is-it-for">Overview</a></li>
+                    <li><a href="#how-it-works">Architecture</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <section id="hero">
+            <div class="track-bg"></div>
+            <div class="hero-content">
+                <h1>Developing cheats shouldn't be <span class="highlight">hard</span>. Enter RailRip.</h1>
+                <p class="subheader">The world's first anticheat bypass as-a-service. A zero-local-footprint API for developers.</p>
+                <div class="cta-group">
+                    <a class="btn btn-primary">Get API Keys</a>
+                    <a class="btn btn-secondary">Read Docs</a>
+                </div>
+            </div>
+            
+            <div class="train-animation-container">
+                <div class="train-track-line"></div>
+                <div class="station">
+                    <i class="fas fa-laptop-code"></i>
+                    <div class="station-label">USER PC</div>
+                </div>
+                <div class="data-train"><i class="fas fa-train"></i></div>
+                <div class="station" style="color: var(--accent-cyan);">
+                    <i class="fas fa-cloud"></i>
+                    <div class="station-label">RAILRIP CLOUD</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="rail-separator"><i class="fas fa-ellipsis-h"></i></div>
+
+        <section class="section-pad hidden" style="padding-bottom: 0;">
+            <div class="academic-box">
+                <h3><i class="fas fa-graduation-cap"></i> Built on Academic Foundations</h3>
+                [cite_start]<p>RailRip's architecture is inspired by the thesis <em>Exploiting Third-party Software To Bypass Anti-cheat Detection Systems Through Network-driven Development</em> by Klemen Janez Poličar[cite: 10, 11].</p>
+                [cite_start]<p>The research explores the concept of entirely decoupling cheat software from the host computer[cite: 315]. [cite_start]By moving the execution out of bounds of traditional ring-0 anti-cheat scanners, the method inherently voids currently known protection techniques[cite: 316, 227]. [cite_start]While not peer-reviewed, this research forms the theoretical backbone of our remote approach, allowing developers to escape the endless exploit-patch lifecycle[cite: 171, 125].</p>
+            </div>
+        </section>
+
+        <section id="who-is-it-for" class="section-pad">
+            <div class="who-grid">
+                <div class="hidden">
+                    <h2><i class="fas fa-cloud-arrow-up" style="color:var(--accent-cyan)"></i> Hosted in the Cloud</h2>
+                    <br>
+                    <p style="font-size: 1.1rem; line-height: 1.6;">RailRip is built for cheat developers who want to decouple their software from the user's machine. Ship your software to <strong>our cloud</strong> (or bring your own hardware). We take care of the rerouting and packet management. You just subscribe to events via our API.</p>
+                </div>
+                <div class="result-box hidden">
+                    <h3><i class="fas fa-shield-check"></i> Zero Local Footprint</h3>
+                    <p><strong>The Result:</strong> The end user doesn't run <em>any</em> illegitimate software on their laptop. [cite_start]The third-party VNC acts as a trojan horse[cite: 357]. All they need is standard VNC software and our auto-configured VPN. [cite_start]Because your logic runs remotely, you drastically reduce the need to patch your cheat when the game updates[cite: 125].</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="rail-separator"><i class="fas fa-ellipsis-h"></i></div>
+
+        <section id="how-it-works" class="section-pad">
+            <div class="hidden" style="text-align: center; margin-bottom: 40px;">
+                <h2>The Bypass Engine under the Hood</h2>
+                <p class="subheader">We reverse-engineered VNC protocols so you don't have to.</p>
+            </div>
+
+            <div class="diagram-container hidden">
+                <div class="diagram-connector"></div>
+                <div class="diagram-step">
+                    <div class="step-icon"><i class="fas fa-user"></i></div>
+                    <h4>1. The End User</h4>
+                    <p>Runs <strong>only</strong> a standard VNC client + built-in VPN. No shady loaders required on their machine.</p>
+                </div>
+                <div class="diagram-step">
+                    <div class="step-icon"><i class="fas fa-network-wired"></i></div>
+                    <h4>2. RailRip Core</h4>
+                    <p>We handle the complex networking, video stream sending, and route manipulation using our protocols.</p>
+                </div>
+                <div class="diagram-step">
+                    <div class="step-icon"><i class="fas fa-code"></i></div>
+                    <h4>3. Your Software</h4>
+                    <p>Runs in our cloud. Collects game info by subscribing to our API events, and sends input commands back.</p>
+                </div>
+            </div>
+
+            <div class="hidden" style="margin-top: 80px;">
+                <h3 style="text-align: center; margin-bottom: 10px;"><i class="fas fa-unlock-keyhole" style="color:var(--accent-gold)"></i> What We Provide Access To</h3>
+                <p style="text-align: center; color: var(--text-dim); max-width: 600px; margin: 0 auto;">Our API provides raw data access. You use this foundational data to build your own custom capabilities and automation.</p>
+                
+                <div class="capabilities-grid">
+                    <div class="cap-card">
+                        <h4><i class="fas fa-box-open"></i> Raw Packet Access</h4>
+                        [cite_start]<p>We provide access to unencrypted game network packets (via UDP payload extraction [cite: 433]). You can write software to subscribe to these events and sniff the data.</p>
+                    </div>
+                    <div class="cap-card">
+                        <h4><i class="fas fa-video"></i> Video Stream Access</h4>
+                        <p>We stream the VNC image frames directly to your server. You can implement Computer Vision (OpenCV, YOLO) on this raw image stream.</p>
+                    </div>
+                    <div class="cap-card">
+                        <h4><i class="fas fa-keyboard"></i> Input Manipulation API</h4>
+                        <p>Your cheat sends mouse/keyboard instructions to our API. [cite_start]We package them into the VNC protocol and send them securely back to the client[cite: 454].</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="showcase-layout" id="api-showcase">
+                
+                <div class="editor-container hidden">
+                    <div class="editor-header">
+                        <div class="editor-dots">
+                            <div class="editor-dot" style="background:#ff5f56;"></div>
+                            <div class="editor-dot" style="background:#ffbd2e;"></div>
+                            <div class="editor-dot" style="background:#27c93f;"></div>
+                        </div>
+                        <div class="editor-tab">bot_logic.js</div>
+                    </div>
+                    <div class="editor-content" id="typewriter-target">
+                        <span class="cursor-blink"></span>
+                    </div>
+                </div>
+
+                <div class="win11-widget hidden" id="game-widget">
+                    <div class="win11-header">
+                        <div class="win11-title">
+                            <i class="fas fa-gamepad" style="color: #00FFC2;"></i> VNC Game Stream - RailRip
+                        </div>
+                        <div class="win11-controls">
+                            <div class="win11-btn"><i class="fas fa-minus"></i></div>
+                            <div class="win11-btn"><i class="far fa-square"></i></div>
+                            <div class="win11-btn close"><i class="fas fa-times"></i></div>
+                        </div>
+                    </div>
+                    <div class="game-screen" id="game-screen">
+                        <div class="game-target" id="game-target"></div>
+                        <div class="game-player" id="game-player"></div>
+                        <div class="demo-cursor" id="demo-cursor"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+         <section class="section-pad hidden">
+             <div class="case-study-box">
+                <div class="oryx-logo"><i class="fas fa-hippo"></i></div>
+                <div>
+                    <h3>Case Study: <a href="https://oryxbot.com" target="_blank" style="color: var(--accent-cyan); text-decoration: underline;">OryxBot.com</a></h3>
+                    <p>OryxBot utilizes RailRip to create 100% remote automation. They host their bot logic on our machines. By subscribing to our <strong>packet stream API</strong> for state awareness and using our <strong>input manipulation API</strong> to trigger actions, they built a powerful bot that leaves zero footprint on the user's actual gaming rig.</p>
+                </div>
+             </div>
+         </section>
+
+          <div class="rail-separator"><i class="fas fa-ellipsis-h"></i></div>
+
+        <section id="pricing" class="section-pad">
+            <div class="hidden" style="text-align: center;">
+                <h2>Simple, scalable pricing</h2>
+                <p class="subheader">Pay based on API usage.</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="price-card hidden">
+                    <div class="price-title">The Hobo</div>
+                    <div class="price-amount">Free</div>
+                    <ul class="price-features">
+                        <li><i class="fas fa-check"></i> 1,000 requests / hour limit</li>
+                        <li><i class="fas fa-check"></i> Shared Cloud Execution</li>
+                        <li><i class="fas fa-check"></i> API Event Access</li>
+                    </ul>
+                    <a class="btn btn-secondary" style="width: 100%; margin:0;">Start Testing</a>
+                </div>
+                <div class="price-card popular hidden">
+                    <div class="price-title">The Commuter</div>
+                    <div class="price-amount">0.23€ <small>/ 10k reqs</small></div>
+                    <ul class="price-features">
+                        <li><i class="fas fa-check"></i> Pay-as-you-go (Loaded balance)</li>
+                        <li><i class="fas fa-check"></i> Run logic on our cloud</li>
+                        <li><i class="fas fa-check"></i> Or Bring Your Own Hardware</li>
+                        <li><i class="fas fa-check"></i> Full VNC Reversed routing</li>
+                    </ul>
+                    <a class="btn btn-primary" style="width: 100%; margin:0;">Load Balance</a>
+                </div>
+                 <div class="price-card hidden">
+                    <div class="price-title">The Tycoon</div>
+                    <div class="price-amount" style="font-size: 2rem; padding: 12px 0;">Negotiable</div>
+                     <ul class="price-features">
+                        <li><i class="fas fa-check"></i> For high demand clients</li>
+                        <li><i class="fas fa-check"></i> Dedicated infrastructure</li>
+                        <li><i class="fas fa-check"></i> Custom SLA</li>
+                    </ul>
+                    <a class="btn btn-secondary" style="width: 100%; margin:0;">Contact Us</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="logo" style="justify-content: center; margin-bottom: 20px;"><i class="fas fa-train-subway"></i> RailRip</div>
+        <div class="footer-links">
+            <a href="#">API Documentation</a> <a href="#">Terms of Service</a> <a href="#">Privacy Policy</a> <a href="#">Support</a>
+        </div>
+        <p style="margin-top: 20px; color: var(--text-dim); font-size: 0.8rem;">© 2023 RailRip Services. For educational and development purposes only.</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // --- SCROLL ANIMATIONS ---
+            const hiddenElements = document.querySelectorAll('.hidden');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('show');
+                    }
+                });
+            }, { threshold: 0.1 });
+            hiddenElements.forEach((el) => observer.observe(el));
+
+
+            // --- TYPEWRITER EFFECT ---
+            // Note: &nbsp; added for proper indentation rendering
+            const codeLines = [
+                `<span class="sy-comment">// Subscribe to raw network stream</span>`,
+                `<span class="sy-obj">railrip</span>.<span class="sy-prop">PacketReceived</span> <span class="sy-op">+=</span> <span class="sy-prop">ParsePacket</span>;`,
+                ``,
+                `<span class="sy-keyword">function</span> <span class="sy-prop">OnPlayerMovedPacket</span>(<span class="sy-obj">player</span>) {`,
+                `&nbsp;&nbsp;&nbsp;&nbsp;<span class="sy-keyword">const</span> <span class="sy-obj">targetDir</span> <span class="sy-op">=</span> <span class="sy-obj">Bot</span>.<span class="sy-prop">GetWaypoint</span>();`,
+                `&nbsp;&nbsp;&nbsp;&nbsp;`,
+                `&nbsp;&nbsp;&nbsp;&nbsp;<span class="sy-keyword">if</span> (<span class="sy-obj">player</span>.<span class="sy-prop">direction</span> <span class="sy-op">!==</span> <span class="sy-obj">targetDir</span>) {`,
+                `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sy-comment">// Correct path via VNC Injection</span>`,
+                `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sy-obj">railrip</span>.<span class="sy-prop">MoveMouse</span>(<span class="sy-obj">targetDir</span>.<span class="sy-prop">x</span>, <span class="sy-obj">targetDir</span>.<span class="sy-prop">y</span>);`,
+                `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sy-obj">railrip</span>.<span class="sy-prop">Click</span>(<span class="sy-str">'right'</span>);`,
+                `&nbsp;&nbsp;&nbsp;&nbsp;}`,
+                `}`
+            ];
+
+            const typeTarget = document.getElementById('typewriter-target');
+            let typeStarted = false;
+
+            function startTypewriter() {
+                if (typeStarted) return;
+                typeStarted = true;
+                
+                typeTarget.innerHTML = '<span class="cursor-blink"></span>';
+                let lineIndex = 0;
+                
+                function typeNext() {
+                    if (lineIndex >= codeLines.length) return; 
+                    
+                    const line = codeLines[lineIndex];
+                    typeTarget.innerHTML = typeTarget.innerHTML.replace('<span class="cursor-blink"></span>', '') + 
+                                           `<div>${line}</div>` + 
+                                           '<span class="cursor-blink"></span>';
+                    
+                    lineIndex++;
+                    setTimeout(typeNext, Math.random() * 200 + 100); 
+                }
+                setTimeout(typeNext, 500); 
+            }
+
+            // Trigger Typewriter when section is visible
+            const showcaseObserver = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    startTypewriter();
+                    startGameDemo();
+                }
+            }, { threshold: 0.5 });
+            
+            const showcaseEl = document.getElementById('api-showcase');
+            if(showcaseEl) {
+                showcaseObserver.observe(showcaseEl);
+            }
+
+
+            // --- GAME WIDGET DEMO ---
+            let gameStarted = false;
+            function startGameDemo() {
+                if (gameStarted) return;
+                gameStarted = true;
+
+                const screen = document.getElementById('game-screen');
+                const player = document.getElementById('game-player');
+                const cursor = document.getElementById('demo-cursor');
+                const targetMark = document.getElementById('game-target');
+                
+                let screenW = screen.clientWidth;
+                let screenH = screen.clientHeight;
+                
+                let playerAngle = 0;
+                let bgX = 0;
+                let bgY = 0;
+                let speed = 2;
+                
+                // Create particles
+                const particles = [];
+                for(let i=0; i<40; i++) {
+                    let p = document.createElement('div');
+                    p.className = 'game-particle';
+                    p.style.left = Math.random() * 100 + '%';
+                    p.style.top = Math.random() * 100 + '%';
+                    screen.appendChild(p);
+                    particles.push({ el: p, x: Math.random() * screenW, y: Math.random() * screenH });
+                }
+
+                function gameLoop() {
+                    const rad = (playerAngle - 90) * (Math.PI / 180); 
+                    bgX -= Math.cos(rad) * speed;
+                    bgY -= Math.sin(rad) * speed;
+                    screen.style.backgroundPosition = `${bgX}px ${bgY}px`;
+
+                    particles.forEach(p => {
+                        p.x -= Math.cos(rad) * (speed * 1.5);
+                        p.y -= Math.sin(rad) * (speed * 1.5);
+                        
+                        if(p.x < 0) p.x = screenW;
+                        if(p.x > screenW) p.x = 0;
+                        if(p.y < 0) p.y = screenH;
+                        if(p.y > screenH) p.y = 0;
+                        
+                        p.el.style.transform = `translate(${p.x}px, ${p.y}px)`;
+                    });
+
+                    requestAnimationFrame(gameLoop);
+                }
+                
+                function executeBotAction() {
+                    screenW = screen.clientWidth;
+                    screenH = screen.clientHeight;
+                    
+                    const targetX = Math.random() * (screenW - 120) + 60;
+                    const targetY = Math.random() * (screenH - 120) + 60;
+                    
+                    cursor.style.left = `${targetX}px`;
+                    cursor.style.top = `${targetY}px`;
+                    
+                    setTimeout(() => {
+                        cursor.classList.add('clicking');
+                        
+                        targetMark.style.left = `${targetX}px`;
+                        targetMark.style.top = `${targetY}px`;
+                        targetMark.classList.add('active');
+                        
+                        const dx = targetX - (screenW/2);
+                        const dy = targetY - (screenH/2);
+                        let angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+                        
+                        let diff = angle - (playerAngle % 360);
+                        if (diff > 180) diff -= 360;
+                        if (diff < -180) diff += 360;
+                        playerAngle += diff;
+                        
+                        player.style.transform = `translate(-50%, -50%) rotate(${playerAngle}deg)`;
+                        
+                        setTimeout(() => { cursor.classList.remove('clicking'); }, 200);
+                        setTimeout(() => { targetMark.classList.remove('active'); }, 1000);
+
+                    }, 600); 
+
+                    setTimeout(executeBotAction, 3000);
+                }
+
+                gameLoop();
+                executeBotAction();
+            }
+        });
+    </script>
+
+</body>
+</html>

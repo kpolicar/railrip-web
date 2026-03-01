@@ -1,0 +1,2166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RailRip — Anticheat Bypass as a Service</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   CSS CUSTOM PROPERTIES
+   ============================================ */
+:root {
+  --bg-primary: #07070d;
+  --bg-secondary: #0e0e1a;
+  --bg-card: #111122;
+  --bg-card-hover: #161630;
+  --bg-code: #0d1117;
+  --accent: #ff6b35;
+  --accent-glow: rgba(255, 107, 53, 0.3);
+  --accent-dim: #cc5529;
+  --gold: #ffd700;
+  --text-primary: #e8e8f0;
+  --text-secondary: #9999b0;
+  --text-muted: #666680;
+  --track-color: #1a1a2e;
+  --track-steel: #3a3a55;
+  --border: #1e1e35;
+  --green: #4ade80;
+  --blue: #60a5fa;
+  --purple: #a78bfa;
+  --red: #f87171;
+  --pink: #f472b6;
+  --train-body: #e74c3c;
+  --train-accent: #f39c12;
+  --section-gap: 120px;
+  --max-width: 1200px;
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--gold); }
+img { max-width: 100%; }
+ul { list-style: none; }
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--track-steel); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ============================================
+   UTILITIES
+   ============================================ */
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+.section { padding: var(--section-gap) 0; position: relative; }
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+.section-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.7;
+}
+.highlight { color: var(--accent); position: relative; }
+.highlight::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 100%; height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+  opacity: 0.5;
+}
+
+/* ============================================
+   SCROLL ANIMATIONS
+   ============================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-left.visible { opacity: 1; transform: translateX(0); }
+.reveal-right {
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-right.visible { opacity: 1; transform: translateX(0); }
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal-scale.visible { opacity: 1; transform: scale(1); }
+
+/* Staggered children */
+.stagger-children .reveal { transition-delay: calc(var(--i, 0) * 0.1s); }
+
+/* ============================================
+   TRAIN BANNER (TOP)
+   ============================================ */
+.train-banner {
+  width: 100%;
+  height: 80px;
+  background: var(--bg-secondary);
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+}
+.train-tracks {
+  position: absolute;
+  bottom: 18px;
+  left: 0;
+  width: 200%;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, var(--track-steel) 0px, var(--track-steel) 30px, transparent 30px, transparent 40px);
+  animation: tracksScroll 2s linear infinite;
+}
+.train-tracks::before {
+  content: '';
+  position: absolute;
+  top: -4px; left: 0;
+  width: 100%; height: 2px;
+  background: var(--track-steel);
+}
+.train-tracks::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 100%; height: 2px;
+  background: var(--track-steel);
+}
+@keyframes tracksScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-40px); } }
+
+.train-wrapper {
+  position: absolute;
+  bottom: 26px;
+  animation: trainBounce 0.4s ease-in-out infinite alternate, trainMove 18s linear infinite;
+  z-index: 2;
+}
+@keyframes trainBounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-3px); }
+}
+@keyframes trainMove {
+  0% { left: -220px; }
+  100% { left: calc(100% + 50px); }
+}
+
+.train-engine {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+.train-loco {
+  width: 50px; height: 32px;
+  background: var(--train-body);
+  border-radius: 4px 12px 2px 2px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(231,76,60,0.4);
+}
+.train-loco::before {
+  content: '';
+  position: absolute;
+  top: -14px; left: 10px;
+  width: 10px; height: 14px;
+  background: var(--train-accent);
+  border-radius: 3px 3px 0 0;
+}
+.train-loco::after {
+  content: '🚂';
+  position: absolute;
+  top: 2px; right: 4px;
+  font-size: 10px;
+}
+.train-window {
+  position: absolute;
+  top: 6px; left: 22px;
+  width: 14px; height: 10px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.train-car {
+  width: 40px; height: 26px;
+  background: var(--train-accent);
+  border-radius: 3px;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(243,156,18,0.3);
+}
+.train-car::before {
+  content: '';
+  position: absolute;
+  top: 5px; left: 5px; right: 5px; bottom: 5px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+}
+.train-wheel {
+  position: absolute;
+  bottom: -5px;
+  width: 8px; height: 8px;
+  background: #333;
+  border-radius: 50%;
+  border: 1.5px solid #666;
+  animation: wheelSpin 0.3s linear infinite;
+}
+.train-wheel.w1 { left: 4px; }
+.train-wheel.w2 { right: 4px; }
+@keyframes wheelSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Smoke puffs */
+.smoke-container {
+  position: absolute;
+  top: -28px; left: 12px;
+}
+.smoke-puff {
+  position: absolute;
+  width: 12px; height: 12px;
+  background: rgba(200, 200, 220, 0.6);
+  border-radius: 50%;
+  animation: smokePuff 1.5s ease-out infinite;
+}
+.smoke-puff:nth-child(2) { animation-delay: 0.4s; left: -5px; }
+.smoke-puff:nth-child(3) { animation-delay: 0.8s; left: -10px; }
+@keyframes smokePuff {
+  0% { opacity: 0.7; transform: translateY(0) scale(0.5); }
+  100% { opacity: 0; transform: translateY(-30px) translateX(-20px) scale(1.5); }
+}
+
+/* Scenery */
+.scenery {
+  position: absolute;
+  top: 0; left: 0;
+  width: 200%; height: 100%;
+  animation: sceneryMove 12s linear infinite;
+}
+.scenery-item {
+  position: absolute;
+  bottom: 32px;
+  font-size: 16px;
+  opacity: 0.3;
+}
+@keyframes sceneryMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* ============================================
+   NAV
+   ============================================ */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: rgba(7, 7, 13, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: transform 0.3s;
+}
+.nav-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+.nav-logo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-logo span { color: var(--accent); }
+.nav-logo .logo-icon { font-size: 1.1rem; }
+.nav-links { display: flex; gap: 28px; align-items: center; }
+.nav-links a {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text-primary); }
+.nav-cta {
+  background: var(--accent) !important;
+  color: #fff !important;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: 600 !important;
+  font-size: 0.85rem;
+  transition: background 0.2s, transform 0.15s !important;
+}
+.nav-cta:hover { background: var(--accent-dim) !important; transform: translateY(-1px); }
+
+/* ============================================
+   HERO
+   ============================================ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 140px 24px 100px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,107,53,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255,215,0,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 50% at 50% 50%, black 30%, transparent 100%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 2; max-width: 800px; }
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,107,53,0.1);
+  border: 1px solid rgba(255,107,53,0.2);
+  padding: 6px 16px;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 32px;
+  animation: badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,53,0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(255,107,53,0); }
+}
+.hero h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -2px;
+  margin-bottom: 16px;
+}
+.hero h1 .hard {
+  color: var(--accent);
+  font-style: italic;
+  position: relative;
+}
+.hero h1 .hard::after {
+  content: '';
+  position: absolute;
+  bottom: 4px; left: -4px; right: -4px;
+  height: 6px;
+  background: var(--accent);
+  opacity: 0.25;
+  border-radius: 3px;
+}
+.hero .enter-railrip {
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  color: var(--gold);
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+}
+.hero .subheader {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-bottom: 44px;
+  line-height: 1.6;
+}
+.hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.btn {
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(255,107,53,0.3);
+}
+.btn-primary:hover {
+  background: var(--accent-dim);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(255,107,53,0.4);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1.5px solid var(--border);
+}
+.btn-outline:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   THE RESULT
+   ============================================ */
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+  margin-top: 60px;
+}
+.result-visual {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.result-visual::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: conic-gradient(from 180deg, transparent, rgba(255,107,53,0.05), transparent 30%);
+  animation: resultRotate 8s linear infinite;
+}
+@keyframes resultRotate { 100% { transform: rotate(360deg); } }
+.result-diagram {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+}
+.diagram-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 24px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  width: 100%;
+  max-width: 280px;
+  position: relative;
+}
+.diagram-box.user-box { border-color: var(--green); color: var(--green); }
+.diagram-box.cloud-box { border-color: var(--accent); color: var(--accent); background: rgba(255,107,53,0.05); }
+.diagram-box.game-box { border-color: var(--blue); color: var(--blue); }
+.diagram-arrow {
+  width: 2px; height: 30px;
+  background: var(--text-muted);
+  position: relative;
+}
+.diagram-arrow::after {
+  content: '▼';
+  position: absolute;
+  bottom: -10px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  color: var(--text-muted);
+}
+.diagram-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  position: absolute;
+  right: -100px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+.result-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 40px;
+}
+.result-feature {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.result-feature:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+.result-feature .icon { font-size: 1.4rem; margin-bottom: 8px; }
+.result-feature h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.result-feature p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ============================================
+   HOW IT WORKS
+   ============================================ */
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 60px;
+}
+.how-step {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  position: relative;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.how-step:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+}
+.step-num {
+  font-size: 3rem;
+  font-weight: 900;
+  color: rgba(255,107,53,0.1);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+.how-step h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.how-step p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.api-capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.api-tag {
+  background: rgba(255,107,53,0.1);
+  border: 1px solid rgba(255,107,53,0.2);
+  color: var(--accent);
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ============================================
+   WHO IS IT FOR
+   ============================================ */
+.audience-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 60px;
+}
+.audience-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px;
+  transition: border-color 0.3s;
+}
+.audience-card:hover { border-color: var(--accent); }
+.audience-card .card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+.audience-card h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.audience-card p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.audience-card .limitation {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(248,113,113,0.05);
+  border: 1px solid rgba(248,113,113,0.15);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================
+   SHIP TO USERS
+   ============================================ */
+.ship-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 60px;
+}
+.ship-step {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s;
+}
+.ship-step:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+}
+.ship-step .step-icon {
+  width: 56px; height: 56px;
+  background: rgba(255,107,53,0.1);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin: 0 auto 20px;
+}
+.ship-step h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.ship-step p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.vnc-badges {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.vnc-badge {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* ============================================
+   USE CASES
+   ============================================ */
+.usecases-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+  margin-top: 60px;
+}
+.usecase-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  transition: all 0.3s;
+}
+.usecase-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+}
+.usecase-card .uc-icon {
+  font-size: 2rem;
+  margin-bottom: 16px;
+}
+.usecase-card h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.usecase-card p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.info-sources, .interaction-methods {
+  margin-top: 50px;
+}
+.info-sources h3, .interaction-methods h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+/* ============================================
+   LIVE DEMO + CODE EDITOR
+   ============================================ */
+.demo-section {
+  margin-top: 60px;
+}
+.demo-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+  margin-top: 40px;
+}
+
+/* Code editor */
+.code-editor {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  font-family: 'JetBrains Mono', monospace;
+}
+.code-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+}
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.code-dot.red { background: #ff5f57; }
+.code-dot.yellow { background: #ffbd2e; }
+.code-dot.green { background: #28c840; }
+.code-filename {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+.code-body {
+  padding: 20px;
+  font-size: 0.82rem;
+  line-height: 1.8;
+  min-height: 360px;
+  position: relative;
+}
+.code-body .line {
+  white-space: pre;
+  opacity: 0;
+  transition: opacity 0.05s;
+}
+.code-body .line.typed { opacity: 1; }
+.code-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--accent);
+  animation: blink 1s step-end infinite;
+  vertical-align: text-bottom;
+}
+@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+.code-keyword { color: #ff79c6; }
+.code-function { color: #50fa7b; }
+.code-string { color: #f1fa8c; }
+.code-comment { color: #6272a4; }
+.code-variable { color: #bd93f9; }
+.code-operator { color: #ff79c6; }
+.code-property { color: #8be9fd; }
+.code-number { color: #bd93f9; }
+.code-type { color: #8be9fd; font-style: italic; }
+
+/* Browser window (live demo) */
+.browser-window {
+  background: #1a1a2e;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.browser-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #252540;
+  border-bottom: 1px solid var(--border);
+}
+.browser-dots { display: flex; gap: 6px; }
+.browser-dot { width: 10px; height: 10px; border-radius: 50%; }
+.browser-dot.r { background: #ff5f57; }
+.browser-dot.y { background: #ffbd2e; }
+.browser-dot.g { background: #28c840; }
+.browser-url {
+  flex: 1;
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-left: 8px;
+  font-family: 'Inter', sans-serif;
+}
+.browser-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  overflow: hidden;
+  cursor: none;
+}
+#demoCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Animated cursor overlay */
+.demo-cursor {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  z-index: 10;
+  transition: left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), top 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.demo-cursor svg {
+  width: 20px; height: 20px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+.cursor-click-ring {
+  position: absolute;
+  top: 0; left: 0;
+  width: 20px; height: 20px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.5);
+  pointer-events: none;
+}
+.cursor-click-ring.active {
+  animation: clickRing 0.6s ease-out;
+}
+@keyframes clickRing {
+  0% { opacity: 1; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(2.5); }
+}
+
+/* ============================================
+   CASE STUDY
+   ============================================ */
+.casestudy {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.casestudy-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  margin-top: 50px;
+}
+.casestudy-visual {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+}
+.casestudy-logo {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.casestudy-url {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+.casestudy-stats {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+.casestudy-stat {
+  text-align: center;
+}
+.casestudy-stat .num {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+.casestudy-stat .label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.casestudy-text h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.casestudy-text p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+.casestudy-tags {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.cs-tag {
+  background: rgba(255,107,53,0.08);
+  border: 1px solid rgba(255,107,53,0.2);
+  color: var(--accent);
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* ============================================
+   PRICING
+   ============================================ */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 60px;
+}
+.pricing-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 28px;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s;
+}
+.pricing-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+}
+.pricing-card.featured {
+  border-color: var(--accent);
+  background: linear-gradient(160deg, rgba(255,107,53,0.06), var(--bg-card));
+}
+.pricing-card.featured::before {
+  content: 'POPULAR';
+  position: absolute;
+  top: -12px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #fff;
+  padding: 4px 16px;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.pricing-card .plan-name {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.pricing-card .price {
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+.pricing-card .price-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+.pricing-card .plan-features {
+  text-align: left;
+  margin-bottom: 28px;
+}
+.pricing-card .plan-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.pricing-card .plan-features li::before {
+  content: '✓';
+  color: var(--green);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.pricing-card .plan-btn {
+  width: 100%;
+  padding: 12px 0;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.pricing-card .plan-btn.btn-accent {
+  background: var(--accent);
+  color: #fff;
+}
+.pricing-card .plan-btn.btn-accent:hover {
+  background: var(--accent-dim);
+  transform: translateY(-1px);
+}
+.pricing-card .plan-btn.btn-ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1.5px solid var(--border);
+}
+.pricing-card .plan-btn.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 60px 0 40px;
+  text-align: center;
+}
+.footer-logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+.footer-logo span { color: var(--accent); }
+.footer p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.footer-links {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.footer-links a {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 900px) {
+  .result-grid,
+  .demo-layout,
+  .casestudy-layout {
+    grid-template-columns: 1fr;
+  }
+  .how-steps,
+  .pricing-grid,
+  .ship-steps,
+  .usecases-grid {
+    grid-template-columns: 1fr;
+  }
+  .audience-cards {
+    grid-template-columns: 1fr;
+  }
+  .result-features {
+    grid-template-columns: 1fr;
+  }
+  .nav-links { display: none; }
+  .hero h1 { letter-spacing: -1px; }
+  .diagram-label { display: none; }
+}
+@media (max-width: 600px) {
+  .section { padding: 80px 0; }
+  .hero { padding: 120px 16px 80px; }
+  .hero-buttons { flex-direction: column; align-items: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========================================
+     TRAIN BANNER
+     ======================================== -->
+<div class="train-banner">
+  <!-- Scenery -->
+  <div class="scenery">
+    <span class="scenery-item" style="left:5%">🌲</span>
+    <span class="scenery-item" style="left:14%">🌿</span>
+    <span class="scenery-item" style="left:28%">🌲</span>
+    <span class="scenery-item" style="left:38%">🏠</span>
+    <span class="scenery-item" style="left:50%">🌲</span>
+    <span class="scenery-item" style="left:55%">🌲</span>
+    <span class="scenery-item" style="left:68%">🌿</span>
+    <span class="scenery-item" style="left:78%">🌲</span>
+    <span class="scenery-item" style="left:88%">🏠</span>
+    <span class="scenery-item" style="left:95%">🌲</span>
+    <!-- Duplicated for seamless loop -->
+    <span class="scenery-item" style="left:105%">🌲</span>
+    <span class="scenery-item" style="left:114%">🌿</span>
+    <span class="scenery-item" style="left:128%">🌲</span>
+    <span class="scenery-item" style="left:138%">🏠</span>
+    <span class="scenery-item" style="left:150%">🌲</span>
+    <span class="scenery-item" style="left:155%">🌲</span>
+    <span class="scenery-item" style="left:168%">🌿</span>
+    <span class="scenery-item" style="left:178%">🌲</span>
+    <span class="scenery-item" style="left:188%">🏠</span>
+    <span class="scenery-item" style="left:195%">🌲</span>
+  </div>
+
+  <!-- Tracks -->
+  <div class="train-tracks"></div>
+
+  <!-- Train -->
+  <div class="train-wrapper">
+    <div class="smoke-container">
+      <div class="smoke-puff"></div>
+      <div class="smoke-puff"></div>
+      <div class="smoke-puff"></div>
+    </div>
+    <div class="train-engine">
+      <div class="train-loco">
+        <div class="train-window"></div>
+        <div class="train-wheel w1"></div>
+        <div class="train-wheel w2"></div>
+      </div>
+      <div class="train-car">
+        <div class="train-wheel w1"></div>
+        <div class="train-wheel w2"></div>
+      </div>
+      <div class="train-car" style="background:#e67e22;">
+        <div class="train-wheel w1"></div>
+        <div class="train-wheel w2"></div>
+      </div>
+      <div class="train-car" style="background:#e74c3c;">
+        <div class="train-wheel w1"></div>
+        <div class="train-wheel w2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================
+     NAV
+     ======================================== -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <span class="logo-icon">🚂</span>
+      Rail<span>Rip</span>
+    </a>
+    <div class="nav-links">
+      <a href="#how-it-works">How It Works</a>
+      <a href="#use-cases">Use Cases</a>
+      <a href="#demo">Demo</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#" class="nav-cta">Get API Key</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ========================================
+     HERO
+     ======================================== -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span>⚡</span> Now in Public Beta
+    </div>
+    <h1>
+      Developing cheats<br>shouldn't be <span class="hard">hard</span>
+    </h1>
+    <div class="enter-railrip">Enter RailRip</div>
+    <p class="subheader">
+      World's first anticheat bypass as a service.<br>
+      Reverse-engineered VNC protocols. One API. Zero footprint on the end user's machine.
+    </p>
+    <div class="hero-buttons">
+      <button class="btn btn-primary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">
+        Start for Free →
+      </button>
+      <button class="btn btn-outline" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">
+        See How It Works
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     THE RESULT
+     ======================================== -->
+<section class="section" id="the-result">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">The Result</div>
+      <h2 class="section-title">Zero footprint. <span class="highlight">Full control.</span></h2>
+      <p class="section-subtitle">
+        The end user never runs any illegitimate software on their machine.
+        All cheat logic executes in our cloud — completely invisible to any anticheat.
+      </p>
+    </div>
+
+    <div class="result-grid">
+      <div class="result-visual reveal-left">
+        <div class="result-diagram">
+          <div class="diagram-box user-box">
+            👤 End User's Machine
+            <br><small style="color:var(--text-muted);font-weight:400">Only runs a VNC client — 100% legitimate</small>
+            <div class="diagram-label">VNC stream ↓</div>
+          </div>
+          <div class="diagram-arrow"></div>
+          <div class="diagram-box cloud-box">
+            ☁️ RailRip Cloud
+            <br><small style="color:var(--text-secondary);font-weight:400">Your cheat runs here, accesses game data via API</small>
+            <div class="diagram-label">Packets, Video, Input ↕</div>
+          </div>
+          <div class="diagram-arrow"></div>
+          <div class="diagram-box game-box">
+            🎮 Game Client
+            <br><small style="color:var(--text-muted);font-weight:400">Game runs on our server, rerouted traffic</small>
+          </div>
+        </div>
+      </div>
+      <div class="reveal-right">
+        <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:16px;">We handle the hard parts</h3>
+        <p style="color:var(--text-secondary);line-height:1.8;margin-bottom:24px;">
+          RailRip provides reverse-engineered networking protocols for VNC software interaction. We manage traffic rerouting, packet management, mouse &amp; keyboard input manipulation, and video stream delivery — so you can focus purely on your cheat logic.
+        </p>
+        <p style="color:var(--text-secondary);line-height:1.8;margin-bottom:32px;">
+          Users can also <strong style="color:var(--text-primary);">bring their own hardware</strong> — in that case, we stream all necessary data directly to their servers, giving full flexibility on deployment.
+        </p>
+        <div class="result-features">
+          <div class="result-feature reveal" style="--i:0">
+            <div class="icon">📡</div>
+            <h4>Traffic Rerouting</h4>
+            <p>Automatic VPN tunneling and network rerouting for seamless packet flow.</p>
+          </div>
+          <div class="result-feature reveal" style="--i:1">
+            <div class="icon">📦</div>
+            <h4>Packet Management</h4>
+            <p>Intercept, inspect, and manipulate game network packets in real time.</p>
+          </div>
+          <div class="result-feature reveal" style="--i:2">
+            <div class="icon">🖱️</div>
+            <h4>Input Injection</h4>
+            <p>Mouse &amp; keyboard input manipulation sent back to the user's game client.</p>
+          </div>
+          <div class="result-feature reveal" style="--i:3">
+            <div class="icon">📺</div>
+            <h4>Video Streaming</h4>
+            <p>Receive the game's video stream for computer vision and analysis.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     HOW IT WORKS
+     ======================================== -->
+<section class="section" id="how-it-works" style="background:var(--bg-secondary);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Build, deploy, <span class="highlight">profit</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">
+        Ship your cheat software to run on our machines. Subscribe to game events via our API.
+        We provide the streams — you provide the logic.
+      </p>
+    </div>
+    <div class="how-steps stagger-children">
+      <div class="how-step reveal" style="--i:0">
+        <div class="step-num">01</div>
+        <h3>Deploy Your Software</h3>
+        <p>
+          Ship your cheat binary or script to run on our cloud machines. It executes alongside
+          the game client in our infrastructure — never on the end user's device.
+        </p>
+      </div>
+      <div class="how-step reveal" style="--i:1">
+        <div class="step-num">02</div>
+        <h3>Subscribe to Events</h3>
+        <p>
+          Connect to the RailRip API and subscribe to the data streams you need.
+          Our API provides access to all the information your cheat requires.
+        </p>
+        <div class="api-capabilities">
+          <span class="api-tag">Packet Stream</span>
+          <span class="api-tag">Video/Image Stream</span>
+          <span class="api-tag">Audio Stream</span>
+          <span class="api-tag">Input Injection</span>
+        </div>
+      </div>
+      <div class="how-step reveal" style="--i:2">
+        <div class="step-num">03</div>
+        <h3>React &amp; Interact</h3>
+        <p>
+          Process the incoming game data and respond: manipulate packets,
+          inject mouse/keyboard inputs, or send commands back to the game client in real time.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     WHO IS IT FOR
+     ======================================== -->
+<section class="section" id="audience">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Who Is It For</div>
+      <h2 class="section-title">Built for <span class="highlight">cheat developers</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">
+        If you're tired of fighting anticheat updates, RailRip gives you a plug-and-play bypass
+        so you can focus on what you do best — writing cheat logic.
+      </p>
+    </div>
+    <div class="audience-cards">
+      <div class="audience-card reveal-left">
+        <div class="card-icon">🔧</div>
+        <h3>Cheat Developers</h3>
+        <p>
+          You want a reliable, ready-made anticheat bypass without having to reverse-engineer
+          kernel drivers or worry about signature detection. RailRip handles the entire bypass
+          layer — you just write your cheat against our API. Ship faster, update less.
+        </p>
+      </div>
+      <div class="audience-card reveal-right">
+        <div class="card-icon">⚡</div>
+        <h3>Plug-and-Play Integration</h3>
+        <p>
+          No need to maintain your own bypass infrastructure. Our API is straightforward:
+          subscribe to events, process data, send commands. Works with any language
+          that can make HTTP/WebSocket calls.
+        </p>
+        <div class="limitation">
+          <span>⚠️</span>
+          <span>Inherent network delay — latency depends on user's distance to our servers. Best suited for cheats where sub-10ms reaction time isn't critical.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     SHIP TO USERS
+     ======================================== -->
+<section class="section" id="ship-to-users" style="background:var(--bg-secondary);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Ship to Users</div>
+      <h2 class="section-title">Getting your users <span class="highlight">connected</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">
+        Your end users just need a VNC client and an internet connection.
+        We provide open-source installation scripts you can ship alongside your product.
+      </p>
+    </div>
+    <div class="ship-steps stagger-children">
+      <div class="ship-step reveal" style="--i:0">
+        <div class="step-icon">📥</div>
+        <h3>Download a VNC Client</h3>
+        <p>
+          Users install any supported VNC client to connect to the cloud session where
+          their game runs.
+        </p>
+        <div class="vnc-badges">
+          <span class="vnc-badge">TeamViewer</span>
+          <span class="vnc-badge">AnyDesk</span>
+          <span class="vnc-badge">TightVNC</span>
+        </div>
+      </div>
+      <div class="ship-step reveal" style="--i:1">
+        <div class="step-icon">🔒</div>
+        <h3>Auto-Configure VPN</h3>
+        <p>
+          Windows users are automatically configured with a built-in VPN connection to our servers,
+          rerouting all game traffic transparently.
+        </p>
+      </div>
+      <div class="ship-step reveal" style="--i:2">
+        <div class="step-icon">📜</div>
+        <h3>Installation Scripts</h3>
+        <p>
+          We provide fully open-source installation scripts that you can ship to your users.
+          They auto-configure the VNC client to connect to our service — inspect and modify them freely.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     USE CASES
+     ======================================== -->
+<section class="section" id="use-cases">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Use Cases</div>
+      <h2 class="section-title">Three sources. <span class="highlight">Endless possibilities.</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">
+        Our API gives you access to three streams of information from the game, and two methods to interact with it. Combine them to build any cheat you can imagine.
+      </p>
+    </div>
+
+    <div class="info-sources">
+      <h3 class="reveal">📡 Information Sources</h3>
+      <div class="usecases-grid stagger-children">
+        <div class="usecase-card reveal" style="--i:0">
+          <div class="uc-icon">📦</div>
+          <h3>Network Packets</h3>
+          <p>
+            Capture and analyze unencrypted game network packets. Read player positions,
+            game state, inventory data, and any protocol-level information the game transmits.
+          </p>
+        </div>
+        <div class="usecase-card reveal" style="--i:1">
+          <div class="uc-icon">👁️</div>
+          <h3>Video / Image Stream</h3>
+          <p>
+            Receive the game's visual output for computer vision processing. Run object detection,
+            OCR, or any image analysis on the live game feed.
+          </p>
+        </div>
+        <div class="usecase-card reveal" style="--i:2">
+          <div class="uc-icon">🔊</div>
+          <h3>Audio Stream</h3>
+          <p>
+            Access the game's audio output for sound-based analysis. Detect footsteps,
+            gunshots, voice cues, or any audio event the game produces.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="interaction-methods" style="margin-top:60px;">
+      <h3 class="reveal">🎮 Interaction Methods</h3>
+      <div class="usecases-grid stagger-children" style="grid-template-columns:1fr 1fr;">
+        <div class="usecase-card reveal" style="--i:0">
+          <div class="uc-icon">📨</div>
+          <h3>Packet Manipulation</h3>
+          <p>
+            Send crafted packets or modify existing game network traffic. Spoof movements,
+            trigger actions, or intercept and alter data before it reaches the server.
+          </p>
+        </div>
+        <div class="usecase-card reveal" style="--i:1">
+          <div class="uc-icon">🖱️</div>
+          <h3>Mouse &amp; Keyboard Input</h3>
+          <p>
+            Inject mouse movements, clicks, and keyboard presses that are sent back to the
+            cheat user's game client. Perfect for aimbots, auto-clickers, and automated movement.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     LIVE DEMO + CODE EDITOR
+     ======================================== -->
+<section class="section demo-section" id="demo" style="background:var(--bg-secondary);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Live Demo</div>
+      <h2 class="section-title">See it in <span class="highlight">action</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">
+        Subscribe to game events, detect the player's movement, and inject corrective mouse input — all through the RailRip API.
+      </p>
+    </div>
+    <div class="demo-layout">
+      <!-- Code Editor -->
+      <div class="code-editor reveal-left" id="codeEditor">
+        <div class="code-titlebar">
+          <div class="code-dot red"></div>
+          <div class="code-dot yellow"></div>
+          <div class="code-dot green"></div>
+          <span class="code-filename">cheat.js — RailRip SDK</span>
+        </div>
+        <div class="code-body" id="codeBody">
+        </div>
+      </div>
+
+      <!-- Browser Window / Live Demo -->
+      <div class="browser-window reveal-right" id="browserDemo">
+        <div class="browser-toolbar">
+          <div class="browser-dots">
+            <div class="browser-dot r"></div>
+            <div class="browser-dot y"></div>
+            <div class="browser-dot g"></div>
+          </div>
+          <div class="browser-url">🔒 game-session.railrip.cloud/live</div>
+        </div>
+        <div class="browser-canvas-wrap">
+          <canvas id="demoCanvas"></canvas>
+          <div class="demo-cursor" id="demoCursor">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M4 2L20 12L12 14L8 22L4 2Z" fill="white" stroke="black" stroke-width="1"/>
+            </svg>
+            <div class="cursor-click-ring" id="clickRing"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     CASE STUDY
+     ======================================== -->
+<section class="section casestudy" id="case-study">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Case Study</div>
+      <h2 class="section-title">Powering <span class="highlight">oryxbot.com</span></h2>
+    </div>
+    <div class="casestudy-layout">
+      <div class="casestudy-visual reveal-left">
+        <div class="casestudy-logo">🤖 OryxBot</div>
+        <div class="casestudy-url"><a href="https://oryxbot.com" target="_blank">oryxbot.com</a></div>
+        <div class="casestudy-stats">
+          <div class="casestudy-stat">
+            <div class="num">24/7</div>
+            <div class="label">Uptime</div>
+          </div>
+          <div class="casestudy-stat">
+            <div class="num">0</div>
+            <div class="label">Detections</div>
+          </div>
+          <div class="casestudy-stat">
+            <div class="num">100%</div>
+            <div class="label">Cloud</div>
+          </div>
+        </div>
+      </div>
+      <div class="casestudy-text reveal-right">
+        <h3>Automated Game Bot — Fully Undetectable</h3>
+        <p>
+          OryxBot is a fully automated game bot built on top of the RailRip platform.
+          It leverages our <strong>packet sniffing</strong> capabilities to read game state,
+          player positions, and item data in real time from the network stream —
+          all without touching the game's memory or files.
+        </p>
+        <p>
+          For interaction, OryxBot uses RailRip's <strong>mouse input injection</strong>
+          to navigate, loot, attack, and perform complex in-game actions. Because the bot logic
+          runs entirely in our cloud and only a legitimate VNC client runs on the user's machine,
+          it has maintained a perfect record against anticheat detection.
+        </p>
+        <div class="casestudy-tags">
+          <span class="cs-tag">Packet Sniffing</span>
+          <span class="cs-tag">Mouse Injection</span>
+          <span class="cs-tag">24/7 Automation</span>
+          <span class="cs-tag">Zero Footprint</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     PRICING
+     ======================================== -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Simple, <span class="highlight">usage-based</span> pricing</h2>
+      <p class="section-subtitle" style="margin:0 auto;">
+        Start free. Scale as you grow. Only pay for what you use.
+      </p>
+    </div>
+    <div class="pricing-grid stagger-children">
+      <!-- Free -->
+      <div class="pricing-card reveal" style="--i:0">
+        <div class="plan-name">Free</div>
+        <div class="price">€0</div>
+        <div class="price-sub">forever</div>
+        <ul class="plan-features">
+          <li>1,000 API requests / hour</li>
+          <li>All data streams included</li>
+          <li>Input injection</li>
+          <li>Community support</li>
+        </ul>
+        <button class="plan-btn btn-ghost">Get Started</button>
+      </div>
+      <!-- Standard -->
+      <div class="pricing-card featured reveal" style="--i:1">
+        <div class="plan-name">Standard</div>
+        <div class="price">€0.23</div>
+        <div class="price-sub">per 10,000 requests</div>
+        <ul class="plan-features">
+          <li>Unlimited requests</li>
+          <li>All data streams included</li>
+          <li>Input injection</li>
+          <li>Balance-based billing</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="plan-btn btn-accent">Load Balance →</button>
+      </div>
+      <!-- Enterprise -->
+      <div class="pricing-card reveal" style="--i:2">
+        <div class="plan-name">Enterprise</div>
+        <div class="price">Custom</div>
+        <div class="price-sub">negotiable</div>
+        <ul class="plan-features">
+          <li>Volume discounts</li>
+          <li>Dedicated infrastructure</li>
+          <li>Custom SLAs</li>
+          <li>Bring your own hardware</li>
+          <li>Direct engineering support</li>
+        </ul>
+        <button class="plan-btn btn-ghost">Contact Us</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     FOOTER
+     ======================================== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-logo">🚂 Rail<span>Rip</span></div>
+    <p>World's first anticheat bypass as a service.</p>
+    <div class="footer-links">
+      <a href="#">Docs</a>
+      <a href="#">API Reference</a>
+      <a href="#">GitHub</a>
+      <a href="#">Discord</a>
+      <a href="#">Contact</a>
+    </div>
+    <p style="margin-top:32px;font-size:0.75rem;">© 2026 RailRip. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- ========================================
+     JAVASCRIPT
+     ======================================== -->
+<script>
+// ============================================
+// Scroll-triggered reveal animations
+// ============================================
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // Once revealed, stop observing
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => {
+    observer.observe(el);
+  });
+})();
+
+// ============================================
+// Code typing animation
+// ============================================
+(function() {
+  const codeLines = [
+    { text: '// Subscribe to game events via RailRip API', cls: 'comment' },
+    { text: 'const rr = new RailRip({ apiKey: "your-key" });', parts: [
+      { text: 'const ', cls: 'keyword' },
+      { text: 'rr', cls: 'variable' },
+      { text: ' = ', cls: 'operator' },
+      { text: 'new ', cls: 'keyword' },
+      { text: 'RailRip', cls: 'type' },
+      { text: '({ ', cls: '' },
+      { text: 'apiKey', cls: 'property' },
+      { text: ': ', cls: '' },
+      { text: '"your-key"', cls: 'string' },
+      { text: ' });', cls: '' },
+    ]},
+    { text: '' },
+    { text: '// Define where we want the player to go', cls: 'comment' },
+    { text: 'let targetPos = { x: 400, y: 250 };', parts: [
+      { text: 'let ', cls: 'keyword' },
+      { text: 'targetPos', cls: 'variable' },
+      { text: ' = { ', cls: '' },
+      { text: 'x', cls: 'property' },
+      { text: ': ', cls: '' },
+      { text: '400', cls: 'number' },
+      { text: ', ', cls: '' },
+      { text: 'y', cls: 'property' },
+      { text: ': ', cls: '' },
+      { text: '250', cls: 'number' },
+      { text: ' };', cls: '' },
+    ]},
+    { text: '' },
+    { text: '// Listen for player movement packets', cls: 'comment' },
+    { text: 'rr.on("packet:PlayerMove", (pkt) => {', parts: [
+      { text: 'rr', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'on', cls: 'function' },
+      { text: '(', cls: '' },
+      { text: '"packet:PlayerMove"', cls: 'string' },
+      { text: ', (', cls: '' },
+      { text: 'pkt', cls: 'variable' },
+      { text: ') => {', cls: 'operator' },
+    ]},
+    { text: '  const { x, y, direction } = pkt.player;', parts: [
+      { text: '  ', cls: '' },
+      { text: 'const ', cls: 'keyword' },
+      { text: '{ x, y, direction }', cls: 'variable' },
+      { text: ' = ', cls: 'operator' },
+      { text: 'pkt', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'player', cls: 'property' },
+      { text: ';', cls: '' },
+    ]},
+    { text: '' },
+    { text: '  // If player is heading the wrong way,', cls: 'comment' },
+    { text: '  // inject a mouse click to correct course', cls: 'comment' },
+    { text: '  if (direction !== getDesiredDir(targetPos)) {', parts: [
+      { text: '  ', cls: '' },
+      { text: 'if', cls: 'keyword' },
+      { text: ' (', cls: '' },
+      { text: 'direction', cls: 'variable' },
+      { text: ' !== ', cls: 'operator' },
+      { text: 'getDesiredDir', cls: 'function' },
+      { text: '(', cls: '' },
+      { text: 'targetPos', cls: 'variable' },
+      { text: ')) {', cls: '' },
+    ]},
+    { text: '    rr.injectMouse(targetPos.x, targetPos.y);', parts: [
+      { text: '    ', cls: '' },
+      { text: 'rr', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'injectMouse', cls: 'function' },
+      { text: '(', cls: '' },
+      { text: 'targetPos', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'x', cls: 'property' },
+      { text: ', ', cls: '' },
+      { text: 'targetPos', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'y', cls: 'property' },
+      { text: ');', cls: '' },
+    ]},
+    { text: '  }', cls: '' },
+    { text: '});', cls: '' },
+    { text: '' },
+    { text: '// Start the session', cls: 'comment' },
+    { text: 'rr.connect("session-abc123");', parts: [
+      { text: 'rr', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'connect', cls: 'function' },
+      { text: '(', cls: '' },
+      { text: '"session-abc123"', cls: 'string' },
+      { text: ');', cls: '' },
+    ]},
+  ];
+
+  const codeBody = document.getElementById('codeBody');
+  let started = false;
+
+  function buildLineHTML(lineData) {
+    if (lineData.parts) {
+      return lineData.parts.map(p => p.cls ? `<span class="code-${p.cls}">${escHtml(p.text)}</span>` : escHtml(p.text)).join('');
+    }
+    if (lineData.cls) {
+      return `<span class="code-${lineData.cls}">${escHtml(lineData.text)}</span>`;
+    }
+    return escHtml(lineData.text);
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Prepare line elements
+  const lineEls = [];
+  codeLines.forEach((line) => {
+    const div = document.createElement('div');
+    div.className = 'line';
+    div.innerHTML = line.text === '' ? '&nbsp;' : buildLineHTML(line);
+    codeBody.appendChild(div);
+    lineEls.push(div);
+  });
+
+  // Add cursor
+  const cursorEl = document.createElement('span');
+  cursorEl.className = 'code-cursor';
+  cursorEl.innerHTML = '&nbsp;';
+
+  function startTyping() {
+    if (started) return;
+    started = true;
+    let i = 0;
+    function typeLine() {
+      if (i >= lineEls.length) {
+        // Append cursor to last line
+        lineEls[lineEls.length - 1].appendChild(cursorEl);
+        return;
+      }
+      // Remove cursor from previous line
+      if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+      lineEls[i].classList.add('typed');
+      lineEls[i].appendChild(cursorEl);
+      i++;
+      const delay = codeLines[i-1].text === '' ? 50 : 30 + Math.random() * 60;
+      setTimeout(typeLine, delay);
+    }
+    typeLine();
+  }
+
+  // Observe code editor scroll into view
+  const editorObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        setTimeout(startTyping, 400);
+        editorObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  editorObs.observe(document.getElementById('codeEditor'));
+})();
+
+// ============================================
+// Live Demo Canvas - Top-down game
+// ============================================
+(function() {
+  const canvas = document.getElementById('demoCanvas');
+  const ctx = canvas.getContext('2d');
+  const cursorEl = document.getElementById('demoCursor');
+  const clickRing = document.getElementById('clickRing');
+  const wrap = canvas.parentElement;
+
+  let W, H;
+  function resize() {
+    const rect = wrap.getBoundingClientRect();
+    W = canvas.width = rect.width * window.devicePixelRatio;
+    H = canvas.height = rect.height * window.devicePixelRatio;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const dW = () => W / window.devicePixelRatio;
+  const dH = () => H / window.devicePixelRatio;
+
+  // Player state
+  const player = {
+    x: 0, y: 0, // world position
+    dir: { x: 1, y: 0 },
+    speed: 1.5,
+    size: 16,
+    color: '#60a5fa',
+    eyeAngle: 0,
+  };
+
+  // Particles
+  const particles = [];
+  const MAX_PARTICLES = 80;
+
+  function spawnParticle() {
+    if (particles.length >= MAX_PARTICLES) return;
+    particles.push({
+      x: player.x + (Math.random() - 0.5) * 8,
+      y: player.y + (Math.random() - 0.5) * 8,
+      vx: -player.dir.x * (0.5 + Math.random() * 1),
+      vy: -player.dir.y * (0.5 + Math.random() * 1),
+      life: 1,
+      decay: 0.008 + Math.random() * 0.012,
+      size: 2 + Math.random() * 3,
+      color: Math.random() > 0.5 ? '#4ade80' : '#86efac',
+    });
+  }
+
+  // Grid dots (ground)
+  const gridSpacing = 40;
+
+  // Target direction & cursor animation
+  let targetWorldX = 100;
+  let targetWorldY = 0;
+  let cursorScreenX = dW() / 2 + 80;
+  let cursorScreenY = dH() / 2;
+  let showCursor = false;
+  let animationCycleTime = 0;
+  const DIRECTION_CHANGE_INTERVAL = 3500; // ms
+
+  const directions = [
+    { x: 1, y: 0 },
+    { x: 0.7, y: 0.7 },
+    { x: 0, y: 1 },
+    { x: -0.7, y: 0.7 },
+    { x: -1, y: 0 },
+    { x: -0.7, y: -0.7 },
+    { x: 0, y: -1 },
+    { x: 0.7, y: -0.7 },
+  ];
+  let dirIndex = 0;
+
+  function changeDirection() {
+    dirIndex = (dirIndex + 1) % directions.length;
+    // Skip if same
+    if (directions[dirIndex].x === player.dir.x && directions[dirIndex].y === player.dir.y) {
+      dirIndex = (dirIndex + 1) % directions.length;
+    }
+
+    const newDir = directions[dirIndex];
+    // Calculate cursor position (offset from center)
+    const cx = dW() / 2;
+    const cy = dH() / 2;
+    const offset = 60 + Math.random() * 40;
+    cursorScreenX = cx + newDir.x * offset;
+    cursorScreenY = cy + newDir.y * offset;
+
+    // Show cursor and move
+    showCursor = true;
+    cursorEl.style.left = cursorScreenX + 'px';
+    cursorEl.style.top = cursorScreenY + 'px';
+    cursorEl.style.opacity = '1';
+
+    // Click animation after cursor arrives
+    setTimeout(() => {
+      clickRing.classList.remove('active');
+      void clickRing.offsetWidth;
+      clickRing.classList.add('active');
+
+      // Change player direction
+      setTimeout(() => {
+        player.dir.x = newDir.x;
+        player.dir.y = newDir.y;
+      }, 150);
+    }, 850);
+
+    // Hide cursor after a bit
+    setTimeout(() => {
+      cursorEl.style.opacity = '0';
+      showCursor = false;
+    }, 1800);
+  }
+
+  setInterval(changeDirection, DIRECTION_CHANGE_INTERVAL);
+  // Initial cursor hidden
+  cursorEl.style.opacity = '0';
+
+  // Animation loop
+  let lastTime = 0;
+  function draw(time) {
+    const dt = Math.min(time - lastTime, 50);
+    lastTime = time;
+
+    ctx.save();
+    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+
+    const w = dW();
+    const h = dH();
+
+    // Clear
+    ctx.fillStyle = '#0f1923';
+    ctx.fillRect(0, 0, w, h);
+
+    // Camera follows player - player always at center
+    const camX = player.x - w / 2;
+    const camY = player.y - h / 2;
+
+    // Draw grid dots
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    const startGX = Math.floor(camX / gridSpacing) * gridSpacing;
+    const startGY = Math.floor(camY / gridSpacing) * gridSpacing;
+    for (let gx = startGX; gx < camX + w + gridSpacing; gx += gridSpacing) {
+      for (let gy = startGY; gy < camY + h + gridSpacing; gy += gridSpacing) {
+        const sx = gx - camX;
+        const sy = gy - camY;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Update & draw particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.98;
+      p.vy *= 0.98;
+      p.life -= p.decay;
+      if (p.life <= 0) {
+        particles.splice(i, 1);
+        continue;
+      }
+      const sx = p.x - camX;
+      const sy = p.y - camY;
+      ctx.globalAlpha = p.life * 0.6;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(sx, sy, p.size * p.life, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Move player
+    player.x += player.dir.x * player.speed;
+    player.y += player.dir.y * player.speed;
+
+    // Spawn particles
+    if (Math.random() > 0.3) spawnParticle();
+
+    // Draw player at center
+    const px = w / 2;
+    const py = h / 2;
+
+    // Player shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(px, py + player.size + 3, player.size * 0.9, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Player body
+    ctx.fillStyle = player.color;
+    ctx.beginPath();
+    ctx.arc(px, py, player.size, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Player inner glow
+    const grad = ctx.createRadialGradient(px - 3, py - 4, 0, px, py, player.size);
+    grad.addColorStop(0, 'rgba(255,255,255,0.2)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(px, py, player.size, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Player eyes (looking in direction of movement)
+    const eyeAngle = Math.atan2(player.dir.y, player.dir.x);
+    const eyeDist = 5;
+    const eyeSize = 3.5;
+    const ex1 = px + Math.cos(eyeAngle - 0.5) * eyeDist;
+    const ey1 = py + Math.sin(eyeAngle - 0.5) * eyeDist;
+    const ex2 = px + Math.cos(eyeAngle + 0.5) * eyeDist;
+    const ey2 = py + Math.sin(eyeAngle + 0.5) * eyeDist;
+
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(ex1, ey1, eyeSize, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(ex2, ey2, eyeSize, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pupils
+    const pupilOff = 1.5;
+    ctx.fillStyle = '#1a1a2e';
+    ctx.beginPath();
+    ctx.arc(ex1 + Math.cos(eyeAngle) * pupilOff, ey1 + Math.sin(eyeAngle) * pupilOff, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(ex2 + Math.cos(eyeAngle) * pupilOff, ey2 + Math.sin(eyeAngle) * pupilOff, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Direction indicator (subtle arrow)
+    ctx.strokeStyle = 'rgba(96, 165, 250, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(px + player.dir.x * (player.size + 5), py + player.dir.y * (player.size + 5));
+    ctx.lineTo(px + player.dir.x * (player.size + 25), py + player.dir.y * (player.size + 25));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // HUD overlay
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '10px Inter, sans-serif';
+    ctx.fillText(`pos: (${Math.round(player.x)}, ${Math.round(player.y)})`, 12, 20);
+    ctx.fillText(`dir: (${player.dir.x.toFixed(1)}, ${player.dir.y.toFixed(1)})`, 12, 34);
+
+    // Status indicator
+    ctx.fillStyle = showCursor ? 'rgba(255,107,53,0.8)' : 'rgba(74,222,128,0.8)';
+    ctx.beginPath();
+    ctx.arc(w - 20, 20, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.textAlign = 'right';
+    ctx.fillText(showCursor ? 'CORRECTING' : 'ON TRACK', w - 32, 24);
+    ctx.textAlign = 'left';
+
+    ctx.restore();
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+
+  // Initial direction change
+  setTimeout(changeDirection, 1500);
+})();
+</script>
+</body>
+</html>

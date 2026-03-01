@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — RailRip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --bg-primary: #07070d;
+  --bg-secondary: #0e0e1a;
+  --bg-card: #111122;
+  --accent: #ff6b35;
+  --accent-dim: #cc5529;
+  --accent-glow: rgba(255,107,53,0.25);
+  --gold: #ffd700;
+  --text-primary: #e8e8f0;
+  --text-secondary: #9999b0;
+  --text-muted: #666680;
+  --border: #1e1e35;
+  --border-focus: rgba(255,107,53,0.5);
+  --green: #4ade80;
+  --red: #f87171;
+  --input-bg: #0d0d1e;
+  --input-border: #252540;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+
+/* ============================================
+   LEFT PANEL — BRANDING
+   ============================================ */
+.left-panel {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: -30%; left: -20%;
+  width: 80%; height: 80%;
+  background: radial-gradient(ellipse, rgba(255,107,53,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.left-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+}
+.left-logo {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.left-logo i { color: var(--accent); }
+.left-logo span { color: var(--accent); }
+
+.left-content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.left-tagline {
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+.left-tagline .hl { color: var(--accent); font-style: italic; }
+.left-desc {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 380px;
+  margin-bottom: 36px;
+}
+.left-perks { display: flex; flex-direction: column; gap: 14px; }
+.left-perk {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+.perk-icon {
+  width: 32px; height: 32px;
+  background: rgba(255,107,53,0.1);
+  border: 1px solid rgba(255,107,53,0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.left-footer {
+  position: relative;
+  z-index: 2;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.train-stripe {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 24px, transparent 24px, transparent 32px);
+  opacity: 0.4;
+}
+
+/* ============================================
+   RIGHT PANEL — FORM
+   ============================================ */
+.right-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  overflow-y: auto;
+}
+.form-wrap {
+  width: 100%;
+  max-width: 420px;
+}
+
+.form-heading {
+  margin-bottom: 8px;
+}
+.form-heading h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.form-heading p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 36px;
+}
+.form-heading p a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.form-heading p a:hover { text-decoration: underline; }
+
+/* Error alert */
+.error-alert {
+  display: none;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(248,113,113,0.08);
+  border: 1px solid rgba(248,113,113,0.3);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  font-size: 0.88rem;
+  color: var(--red);
+  line-height: 1.5;
+  animation: shake 0.4s ease;
+}
+.error-alert.show { display: flex; }
+.error-alert i { margin-top: 1px; flex-shrink: 0; }
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* Form fields */
+.field { margin-bottom: 20px; }
+.field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-wrap i.input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  pointer-events: none;
+  z-index: 2;
+}
+.input-wrap input {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  padding: 13px 14px 13px 40px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.input-wrap input::placeholder { color: var(--text-muted); }
+.input-wrap input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
+}
+.input-wrap input.error-field {
+  border-color: rgba(248,113,113,0.5);
+  box-shadow: 0 0 0 3px rgba(248,113,113,0.1);
+}
+
+/* Password toggle */
+.toggle-pw {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 4px;
+  transition: color 0.2s;
+  z-index: 2;
+}
+.toggle-pw:hover { color: var(--text-secondary); }
+
+.field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.remember-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+.remember-label input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.forgot-link {
+  font-size: 0.85rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.forgot-link:hover { text-decoration: underline; }
+
+/* Submit button */
+.btn-submit {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 15px 24px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(255,107,53,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.btn-submit:hover { opacity: 0.88; box-shadow: 0 4px 28px rgba(255,107,53,0.5); }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-spinner {
+  display: none;
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+.btn-submit.loading .btn-spinner { display: block; }
+.btn-submit.loading .btn-text { opacity: 0.7; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.signup-link {
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+.signup-link a {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+.signup-link a:hover { text-decoration: underline; }
+
+/* Responsive */
+@media (max-width: 700px) {
+  body { grid-template-columns: 1fr; }
+  .left-panel { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="left-bg-grid"></div>
+  <a href="index2.html" class="left-logo">
+    <i class="fas fa-train-subway"></i>
+    Rail<span>Rip</span>
+  </a>
+  <div class="left-content">
+    <div class="left-tagline">
+      Your cloud.<br>Their <span class="hl">anticheat</span>.<br>Your win.
+    </div>
+    <p class="left-desc">
+      Sign in to manage your API keys, monitor usage, view session logs,
+      and configure your RailRip deployment.
+    </p>
+    <div class="left-perks">
+      <div class="left-perk">
+        <div class="perk-icon"><i class="fas fa-key"></i></div>
+        API key management
+      </div>
+      <div class="left-perk">
+        <div class="perk-icon"><i class="fas fa-chart-bar"></i></div>
+        Real-time session analytics
+      </div>
+      <div class="left-perk">
+        <div class="perk-icon"><i class="fas fa-book"></i></div>
+        Full documentation access
+      </div>
+    </div>
+  </div>
+  <div class="left-footer">
+    &copy; 2025 RailRip &mdash; <a href="tos.html" style="color:inherit">Terms</a> &middot; <a href="privacy.html" style="color:inherit">Privacy</a>
+  </div>
+  <div class="train-stripe"></div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="form-wrap">
+    <div class="form-heading">
+      <h1>Welcome back</h1>
+      <p>Don't have an account? <a href="register.html">Create one free &rarr;</a></p>
+    </div>
+
+    <!-- Error alert (hidden by default) -->
+    <div class="error-alert" id="errorAlert">
+      <i class="fas fa-circle-exclamation"></i>
+      <span>Invalid credentials. Please check your email and password and try again.</span>
+    </div>
+
+    <form id="loginForm" autocomplete="off" novalidate>
+      <div class="field">
+        <label for="email">Email address</label>
+        <div class="input-wrap">
+          <i class="fas fa-envelope input-icon"></i>
+          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" id="password" name="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
+          <button type="button" class="toggle-pw" id="togglePw" title="Toggle password visibility">
+            <i class="fas fa-eye" id="togglePwIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <label class="remember-label">
+          <input type="checkbox" id="remember"> Remember me
+        </label>
+        <a href="#" class="forgot-link">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <div class="btn-spinner"></div>
+        <span class="btn-text">Sign In &rarr;</span>
+      </button>
+    </form>
+
+    <div class="divider">or</div>
+    <div class="signup-link">
+      New to RailRip? <a href="register.html">Create a free account</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// Toggle password visibility
+const togglePw = document.getElementById('togglePw');
+const pwInput = document.getElementById('password');
+const toggleIcon = document.getElementById('togglePwIcon');
+togglePw.addEventListener('click', () => {
+  const isText = pwInput.type === 'text';
+  pwInput.type = isText ? 'password' : 'text';
+  toggleIcon.className = isText ? 'fas fa-eye' : 'fas fa-eye-slash';
+});
+
+// Form submission — always show "invalid credentials" after delay
+const form = document.getElementById('loginForm');
+const submitBtn = document.getElementById('submitBtn');
+const errorAlert = document.getElementById('errorAlert');
+const emailInput = document.getElementById('email');
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  errorAlert.classList.remove('show');
+  emailInput.classList.remove('error-field');
+  pwInput.classList.remove('error-field');
+
+  submitBtn.disabled = true;
+  submitBtn.classList.add('loading');
+  submitBtn.querySelector('.btn-text').textContent = 'Signing in…';
+
+  setTimeout(() => {
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('loading');
+    submitBtn.querySelector('.btn-text').textContent = 'Sign In →';
+    emailInput.classList.add('error-field');
+    pwInput.classList.add('error-field');
+    errorAlert.classList.add('show');
+    errorAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 1100);
+});
+</script>
+</body>
+</html>

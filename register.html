@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account — RailRip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #07070d;
+  --bg-secondary: #0e0e1a;
+  --bg-card: #111122;
+  --accent: #ff6b35;
+  --accent-dim: #cc5529;
+  --accent-glow: rgba(255,107,53,0.25);
+  --gold: #ffd700;
+  --text-primary: #e8e8f0;
+  --text-secondary: #9999b0;
+  --text-muted: #666680;
+  --border: #1e1e35;
+  --border-focus: rgba(255,107,53,0.5);
+  --green: #4ade80;
+  --red: #f87171;
+  --input-bg: #0d0d1e;
+  --input-border: #252540;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+
+/* ============================================
+   LEFT PANEL — BRANDING
+   ============================================ */
+.left-panel {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: -30%; left: -20%;
+  width: 80%; height: 80%;
+  background: radial-gradient(ellipse, rgba(255,107,53,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.left-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+}
+.left-logo {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.left-logo span { color: var(--accent); }
+.left-content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.left-tagline {
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+.left-tagline .hl { color: var(--accent); font-style: italic; }
+.left-desc {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 380px;
+  margin-bottom: 36px;
+}
+.left-perks { display: flex; flex-direction: column; gap: 14px; }
+.left-perk {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+.perk-icon {
+  width: 32px; height: 32px;
+  background: rgba(255,107,53,0.1);
+  border: 1px solid rgba(255,107,53,0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.left-footer {
+  position: relative;
+  z-index: 2;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+/* Train stripe decoration */
+.train-stripe {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 24px, transparent 24px, transparent 32px);
+  opacity: 0.4;
+}
+
+/* ============================================
+   RIGHT PANEL — FORM
+   ============================================ */
+.right-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  overflow-y: auto;
+}
+.form-wrap {
+  width: 100%;
+  max-width: 440px;
+}
+
+/* Step progress */
+.step-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 36px;
+}
+.step-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s;
+}
+.step-dot.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.step-dot.done {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  overflow: hidden;
+  position: relative;
+}
+.step-line-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 1px;
+  width: 0%;
+  transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+.step-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+/* Form container with sliding */
+.forms-viewport {
+  position: relative;
+  overflow: hidden;
+}
+.form-slide {
+  width: 100%;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.45s ease;
+  opacity: 1;
+  transform: translateX(0);
+}
+.form-slide.slide-out-left {
+  transform: translateX(-110%);
+  opacity: 0;
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+}
+.form-slide.slide-in-right {
+  transform: translateX(110%);
+  opacity: 0;
+  position: absolute;
+  top: 0; left: 0;
+}
+.form-slide.slide-in-right.slide-active {
+  transform: translateX(0);
+  opacity: 1;
+  position: relative;
+}
+
+/* Form heading */
+.form-heading { margin-bottom: 28px; }
+.form-heading h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.form-heading p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.form-heading .step-subtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* Input groups */
+.input-group {
+  margin-bottom: 18px;
+}
+.input-group label {
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 7px;
+  letter-spacing: 0.2px;
+}
+.input-field {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  appearance: none;
+}
+.input-field::placeholder { color: var(--text-muted); }
+.input-field:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(255,107,53,0.08);
+}
+.input-field.error { border-color: var(--red); }
+.input-error {
+  font-size: 0.75rem;
+  color: var(--red);
+  margin-top: 5px;
+  display: none;
+}
+.input-error.visible { display: block; }
+.input-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 5px;
+}
+
+/* Password strength */
+.pw-strength {
+  margin-top: 8px;
+  display: flex;
+  gap: 4px;
+}
+.pw-bar {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.3s;
+}
+.pw-bar.weak { background: var(--red); }
+.pw-bar.medium { background: var(--gold); }
+.pw-bar.strong { background: var(--green); }
+
+/* Select input */
+select.input-field {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23666680' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  cursor: pointer;
+}
+select.input-field option { background: #0e0e1a; }
+
+/* Card input group */
+.card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.card-logo-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+.card-logo {
+  height: 24px;
+  padding: 2px 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.card-logo.visa { color: #1a1fe8; background: #fff; }
+.card-logo.mc { color: #eb001b; background: #fff; }
+.card-logo.amex { color: #2e77bc; background: #fff; }
+
+/* Free trial banner */
+.trial-banner {
+  background: rgba(74,222,128,0.06);
+  border: 1px solid rgba(74,222,128,0.2);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.trial-banner .tb-icon { font-size: 1.1rem; flex-shrink: 0; padding-top: 1px; }
+.trial-banner .tb-text { flex: 1; }
+.trial-banner .tb-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 3px;
+}
+.trial-banner .tb-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.trial-banner .tb-lock {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Submit button */
+.submit-btn {
+  width: 100%;
+  padding: 14px 0;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(255,107,53,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+.submit-btn:hover {
+  background: var(--accent-dim);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 28px rgba(255,107,53,0.35);
+}
+.submit-btn:active { transform: translateY(0); }
+.submit-btn.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+.btn-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+.submit-btn.loading .btn-spinner { display: block; }
+.submit-btn.loading .btn-text { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Fine print */
+.fine-print {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 16px;
+  line-height: 1.5;
+}
+.fine-print a { color: var(--accent); text-decoration: none; }
+.fine-print a:hover { text-decoration: underline; }
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Success overlay */
+.success-overlay {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+.success-overlay.visible { display: flex; }
+.success-icon {
+  width: 72px; height: 72px;
+  background: rgba(74,222,128,0.1);
+  border: 2px solid var(--green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 24px;
+  animation: popIn 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes popIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.success-overlay h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.success-overlay p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  max-width: 340px;
+}
+.success-overlay .api-key-display {
+  margin-top: 24px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+.success-overlay .back-link {
+  margin-top: 24px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.success-overlay .back-link a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 800px) {
+  body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; overflow: auto; }
+  .left-panel {
+    padding: 24px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    min-height: auto;
+  }
+  .left-content { display: none; }
+  .left-footer { display: none; }
+  .right-panel { padding: 24px; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     LEFT PANEL
+     ============================================ -->
+<div class="left-panel">
+  <div class="left-bg-grid"></div>
+  <div class="train-stripe"></div>
+
+  <a href="index2.html" class="left-logo">
+    🚂 Rail<span>Rip</span>
+  </a>
+
+  <div class="left-content">
+    <div class="left-tagline">
+      Get started in<br><span class="hl">minutes.</span>
+    </div>
+    <p class="left-desc">
+      Create your free RailRip account and start building anticheat-bypassed cheats today.
+      No card charge until you upgrade — your free tier activates immediately.
+    </p>
+    <div class="left-perks">
+      <div class="left-perk">
+        <div class="perk-icon">⚡</div>
+        <span>1,000 free API requests per hour, forever</span>
+      </div>
+      <div class="left-perk">
+        <div class="perk-icon">📦</div>
+        <span>Full packet stream + input injection on free tier</span>
+      </div>
+      <div class="left-perk">
+        <div class="perk-icon">🔒</div>
+        <span>Zero illegitimate software on your users' machines</span>
+      </div>
+      <div class="left-perk">
+        <div class="perk-icon">🚀</div>
+        <span>Scale to standard billing automatically as you grow</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="left-footer">
+    Already have an account? <a href="#" style="color:var(--accent);">Sign in</a>
+  </div>
+</div>
+
+<!-- ============================================
+     RIGHT PANEL — FORMS
+     ============================================ -->
+<div class="right-panel">
+  <div class="form-wrap">
+
+    <!-- Step progress indicator -->
+    <div class="step-progress" id="stepProgress">
+      <div class="step-dot active" id="dot1">1</div>
+      <div class="step-line"><div class="step-line-fill" id="stepLineFill"></div></div>
+      <div class="step-dot" id="dot2">2</div>
+      <span class="step-label" id="stepLabel">Account Details</span>
+    </div>
+
+    <!-- Forms viewport -->
+    <div class="forms-viewport" id="formsViewport">
+
+      <!-- STEP 1 — Personal details -->
+      <div class="form-slide" id="step1">
+        <div class="form-heading">
+          <div class="step-subtitle">🚂 Step 1 of 2</div>
+          <h1>Create your account</h1>
+          <p>Start your free trial — no charge required to get started.</p>
+        </div>
+
+        <div class="input-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" class="input-field" placeholder="you@example.com" autocomplete="email">
+          <div class="input-error" id="emailError">Please enter a valid email address.</div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="input-field" placeholder="At least 8 characters" autocomplete="new-password">
+          <div class="pw-strength" id="pwStrength">
+            <div class="pw-bar" id="pwBar1"></div>
+            <div class="pw-bar" id="pwBar2"></div>
+            <div class="pw-bar" id="pwBar3"></div>
+            <div class="pw-bar" id="pwBar4"></div>
+          </div>
+          <div class="input-error" id="passwordError">Password must be at least 8 characters.</div>
+        </div>
+
+        <div class="input-group">
+          <label for="userCount">Expected active user count</label>
+          <select id="userCount" class="input-field">
+            <option value="" disabled selected>Select expected users…</option>
+            <option value="1-10">1 – 10 users (hobby / testing)</option>
+            <option value="10-100">10 – 100 users (small release)</option>
+            <option value="100-1000">100 – 1,000 users (growing product)</option>
+            <option value="1000-10000">1,000 – 10,000 users (large deployment)</option>
+            <option value="10000+">10,000+ users (enterprise)</option>
+          </select>
+          <div class="input-hint">Helps us allocate cloud resources for your sessions.</div>
+          <div class="input-error" id="userCountError">Please select an expected user count.</div>
+        </div>
+
+        <button class="submit-btn" id="step1Btn" onclick="submitStep1()">
+          <span class="btn-text">Continue →</span>
+          <div class="btn-spinner"></div>
+        </button>
+
+        <p class="fine-print">
+          By continuing you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </p>
+      </div>
+
+      <!-- STEP 2 — Card details -->
+      <div class="form-slide slide-in-right" id="step2">
+        <div class="form-heading">
+          <div class="step-subtitle">💳 Step 2 of 2</div>
+          <h1>Activate free trial</h1>
+          <p>Your card is saved for future billing. You won't be charged today.</p>
+        </div>
+
+        <div class="trial-banner">
+          <div class="tb-icon">✅</div>
+          <div class="tb-text">
+            <div class="tb-title">Free trial — no charge today</div>
+            <div class="tb-desc">You get 1,000 API requests per hour at no cost. Your card is only charged if you load balance manually.</div>
+            <div class="tb-lock">🔒 Secured with 256-bit TLS encryption</div>
+          </div>
+        </div>
+
+        <div class="card-logo-row">
+          <div class="card-logo visa">VISA</div>
+          <div class="card-logo mc">MC</div>
+          <div class="card-logo amex">AMEX</div>
+          <span style="font-size:0.72rem;color:var(--text-muted);margin-left:4px;">Debit cards accepted</span>
+        </div>
+
+        <div class="input-group">
+          <label for="cardName">Cardholder name</label>
+          <input type="text" id="cardName" class="input-field" placeholder="Name as on card" autocomplete="cc-name">
+          <div class="input-error" id="cardNameError">Please enter the cardholder name.</div>
+        </div>
+
+        <div class="input-group">
+          <label for="cardNum">Card number</label>
+          <input type="text" id="cardNum" class="input-field" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number" inputmode="numeric">
+          <div class="input-error" id="cardNumError">Please enter a valid 16-digit card number.</div>
+        </div>
+
+        <div class="card-row">
+          <div class="input-group">
+            <label for="cardExp">Expiry</label>
+            <input type="text" id="cardExp" class="input-field" placeholder="MM / YY" maxlength="7" autocomplete="cc-exp" inputmode="numeric">
+            <div class="input-error" id="cardExpError">Invalid expiry date.</div>
+          </div>
+          <div class="input-group">
+            <label for="cardCvc">CVC</label>
+            <input type="text" id="cardCvc" class="input-field" placeholder="•••" maxlength="4" autocomplete="cc-csc" inputmode="numeric">
+            <div class="input-error" id="cardCvcError">Invalid CVC.</div>
+          </div>
+        </div>
+
+        <button class="submit-btn" id="step2Btn" onclick="submitStep2()">
+          <span class="btn-text">Register &amp; activate free trial</span>
+          <div class="btn-spinner"></div>
+        </button>
+
+        <p class="fine-print">
+          🔒 Your payment details are encrypted and stored securely. You will not be billed until you manually load balance. <a href="#">Cancel anytime</a>.
+        </p>
+      </div>
+
+    </div><!-- /forms-viewport -->
+
+    <!-- Success overlay -->
+    <div class="success-overlay" id="successOverlay">
+      <div class="success-icon">🎉</div>
+      <h2>You're all set!</h2>
+      <p>Your RailRip account is active. Your free trial starts now — 1,000 requests per hour, no charge.</p>
+      <div class="api-key-display" id="apiKeyDisplay">rr_live_••••••••••••••••</div>
+      <p class="back-link">Head to the <a href="#">developer dashboard →</a></p>
+    </div>
+
+  </div><!-- /form-wrap -->
+</div><!-- /right-panel -->
+
+<script>
+// ============================================
+// Password strength meter
+// ============================================
+document.getElementById('password').addEventListener('input', function() {
+  const val = this.value;
+  const bars = [
+    document.getElementById('pwBar1'),
+    document.getElementById('pwBar2'),
+    document.getElementById('pwBar3'),
+    document.getElementById('pwBar4'),
+  ];
+  bars.forEach(b => { b.className = 'pw-bar'; });
+  if (val.length === 0) return;
+  let strength = 0;
+  if (val.length >= 8) strength++;
+  if (/[A-Z]/.test(val)) strength++;
+  if (/[0-9]/.test(val)) strength++;
+  if (/[^A-Za-z0-9]/.test(val)) strength++;
+  const cls = strength <= 1 ? 'weak' : strength <= 2 ? 'medium' : 'strong';
+  for (let i = 0; i < strength; i++) bars[i].classList.add(cls);
+});
+
+// ============================================
+// Card number formatter
+// ============================================
+document.getElementById('cardNum').addEventListener('input', function() {
+  let val = this.value.replace(/\D/g, '').substring(0, 16);
+  this.value = val.replace(/(.{4})/g, '$1 ').trim();
+});
+document.getElementById('cardExp').addEventListener('input', function() {
+  let val = this.value.replace(/\D/g, '').substring(0, 4);
+  if (val.length >= 3) val = val.substring(0,2) + ' / ' + val.substring(2);
+  this.value = val;
+});
+document.getElementById('cardCvc').addEventListener('input', function() {
+  this.value = this.value.replace(/\D/g, '').substring(0,4);
+});
+
+// ============================================
+// Step 1 validation & transition
+// ============================================
+function showError(inputId, errorId, show) {
+  const inp = document.getElementById(inputId);
+  const err = document.getElementById(errorId);
+  if (show) {
+    inp.classList.add('error');
+    err.classList.add('visible');
+  } else {
+    inp.classList.remove('error');
+    err.classList.remove('visible');
+  }
+}
+
+function submitStep1() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const userCount = document.getElementById('userCount').value;
+  let valid = true;
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showError('email', 'emailError', true); valid = false;
+  } else { showError('email', 'emailError', false); }
+
+  if (password.length < 8) {
+    showError('password', 'passwordError', true); valid = false;
+  } else { showError('password', 'passwordError', false); }
+
+  if (!userCount) {
+    showError('userCount', 'userCountError', true); valid = false;
+  } else { showError('userCount', 'userCountError', false); }
+
+  if (!valid) return;
+
+  // Loading state
+  const btn = document.getElementById('step1Btn');
+  btn.classList.add('loading');
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    transitionToStep2();
+  }, 700);
+}
+
+function transitionToStep2() {
+  const s1 = document.getElementById('step1');
+  const s2 = document.getElementById('step2');
+  const dot1 = document.getElementById('dot1');
+  const dot2 = document.getElementById('dot2');
+  const fill = document.getElementById('stepLineFill');
+  const label = document.getElementById('stepLabel');
+
+  // Slide out step 1
+  s1.classList.add('slide-out-left');
+
+  // Prepare step 2
+  s2.style.display = 'block';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      s2.classList.add('slide-active');
+    });
+  });
+
+  // Update progress
+  dot1.className = 'step-dot done';
+  dot1.innerHTML = '✓';
+  dot2.className = 'step-dot active';
+  fill.style.width = '100%';
+  label.textContent = 'Payment Details';
+
+  // Update viewport height
+  const viewport = document.getElementById('formsViewport');
+  viewport.style.minHeight = s2.offsetHeight + 'px';
+}
+
+// ============================================
+// Step 2 validation & success
+// ============================================
+function submitStep2() {
+  const cardName = document.getElementById('cardName').value.trim();
+  const cardNum = document.getElementById('cardNum').value.replace(/\s/g,'');
+  const cardExp = document.getElementById('cardExp').value;
+  const cardCvc = document.getElementById('cardCvc').value;
+  let valid = true;
+
+  if (!cardName) {
+    showError('cardName', 'cardNameError', true); valid = false;
+  } else { showError('cardName', 'cardNameError', false); }
+
+  if (!/^\d{16}$/.test(cardNum)) {
+    showError('cardNum', 'cardNumError', true); valid = false;
+  } else { showError('cardNum', 'cardNumError', false); }
+
+  const expMatch = cardExp.replace(/\s/g,'').match(/^(\d{2})\/(\d{2})$/);
+  if (!expMatch || parseInt(expMatch[1]) > 12 || parseInt(expMatch[1]) < 1) {
+    showError('cardExp', 'cardExpError', true); valid = false;
+  } else { showError('cardExp', 'cardExpError', false); }
+
+  if (!/^\d{3,4}$/.test(cardCvc)) {
+    showError('cardCvc', 'cardCvcError', true); valid = false;
+  } else { showError('cardCvc', 'cardCvcError', false); }
+
+  if (!valid) return;
+
+  // Loading state
+  const btn = document.getElementById('step2Btn');
+  btn.classList.add('loading');
+
+  setTimeout(() => {
+    // Show success, hide everything else
+    document.getElementById('stepProgress').style.display = 'none';
+    document.getElementById('formsViewport').style.display = 'none';
+    const overlay = document.getElementById('successOverlay');
+    overlay.classList.add('visible');
+    // Generate fake API key display
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let key = 'rr_live_';
+    for (let i = 0; i < 24; i++) key += chars[Math.floor(Math.random() * chars.length)];
+    document.getElementById('apiKeyDisplay').textContent = key;
+  }, 1200);
+}
+</script>
+</body>
+</html>

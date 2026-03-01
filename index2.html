@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RailRip — Anticheat Bypass as a Service</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 /* ============================================
    CSS CUSTOM PROPERTIES
@@ -43,7 +45,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; font-size: 16px; }
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   overflow-x: hidden;
@@ -502,27 +504,41 @@ ul { list-style: none; }
 .diagram-box.user-box { border-color: var(--green); color: var(--green); }
 .diagram-box.cloud-box { border-color: var(--accent); color: var(--accent); background: rgba(255,107,53,0.05); }
 .diagram-box.game-box { border-color: var(--blue); color: var(--blue); }
-.diagram-arrow {
-  width: 2px; height: 30px;
-  background: var(--text-muted);
+.diagram-arrow-bi {
+  width: 2px;
+  min-height: 36px;
+  background: linear-gradient(to bottom, var(--accent), var(--blue));
   position: relative;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.diagram-arrow::after {
+.diagram-arrow-bi::before {
+  content: '▲';
+  position: absolute;
+  top: -8px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 7px;
+  color: var(--accent);
+}
+.diagram-arrow-bi::after {
   content: '▼';
   position: absolute;
-  bottom: -10px; left: 50%;
+  bottom: -8px; left: 50%;
   transform: translateX(-50%);
-  font-size: 8px;
-  color: var(--text-muted);
+  font-size: 7px;
+  color: var(--blue);
 }
-.diagram-label {
-  font-size: 0.7rem;
-  color: var(--text-muted);
+.dab-label {
   position: absolute;
-  right: -100px;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 12px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
   white-space: nowrap;
+  background: var(--bg-card);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 .result-features {
   display: grid;
@@ -831,29 +847,41 @@ ul { list-style: none; }
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
-.browser-toolbar {
+/* Windows 11 app chrome */
+.win11-titlebar {
+  height: 32px;
+  background: #1a1a1a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 12px;
+  user-select: none;
+  border-bottom: 1px solid #2e2e2e;
+}
+.win11-title {
+  font-size: 12px;
+  color: #ccc;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
-  background: #252540;
-  border-bottom: 1px solid var(--border);
+  font-family: 'Segoe UI', 'Plus Jakarta Sans', sans-serif;
 }
-.browser-dots { display: flex; gap: 6px; }
-.browser-dot { width: 10px; height: 10px; border-radius: 50%; }
-.browser-dot.r { background: #ff5f57; }
-.browser-dot.y { background: #ffbd2e; }
-.browser-dot.g { background: #28c840; }
-.browser-url {
-  flex: 1;
-  background: rgba(255,255,255,0.06);
-  border-radius: 6px;
-  padding: 5px 14px;
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  margin-left: 8px;
-  font-family: 'Inter', sans-serif;
+.win11-controls { display: flex; height: 100%; }
+.win11-btn {
+  width: 46px; height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ccc;
+  font-size: 11px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
 }
+.win11-btn:hover { background: #333; }
+.win11-close:hover { background: #e81123 !important; color: #fff; }
 .browser-canvas-wrap {
   position: relative;
   width: 100%;
@@ -870,15 +898,30 @@ ul { list-style: none; }
 /* Animated cursor overlay */
 .demo-cursor {
   position: absolute;
-  width: 20px;
-  height: 20px;
   pointer-events: none;
   z-index: 10;
   transition: left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), top 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
 }
 .demo-cursor svg {
   width: 20px; height: 20px;
+  flex-shrink: 0;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+.cursor-label {
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  margin-top: 2px;
+  box-shadow: 0 2px 6px rgba(255,107,53,0.4);
+  letter-spacing: 0.3px;
 }
 .cursor-click-ring {
   position: absolute;
@@ -914,12 +957,22 @@ ul { list-style: none; }
   margin-top: 50px;
 }
 .casestudy-visual {
-  background: var(--bg-card);
+  background: url('https://oryxbot.com/hero.webp') center/cover no-repeat;
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 40px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
 }
+.casestudy-visual::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 7, 13, 0.70);
+  border-radius: 16px;
+}
+.casestudy-visual > * { position: relative; z-index: 1; }
 .casestudy-logo {
   font-size: 2.5rem;
   font-weight: 900;
@@ -1212,7 +1265,7 @@ ul { list-style: none; }
 <nav class="nav">
   <div class="nav-inner">
     <a href="#" class="nav-logo">
-      <span class="logo-icon">🚂</span>
+      <span class="logo-icon"><i class="fas fa-train-subway"></i></span>
       Rail<span>Rip</span>
     </a>
     <div class="nav-links">
@@ -1220,7 +1273,9 @@ ul { list-style: none; }
       <a href="#use-cases">Use Cases</a>
       <a href="#demo">Demo</a>
       <a href="#pricing">Pricing</a>
-      <a href="#" class="nav-cta">Get API Key</a>
+      <a href="docs.html">Docs</a>
+      <a href="login.html" style="opacity:0.75">Sign In</a>
+      <a href="register.html" class="nav-cta">Get API Key</a>
     </div>
   </div>
 </nav>
@@ -1233,14 +1288,14 @@ ul { list-style: none; }
   <div class="hero-grid"></div>
   <div class="hero-content">
     <div class="hero-badge">
-      <span>⚡</span> Now in Public Beta
+      <i class="fas fa-bolt"></i> Now in Public Beta
     </div>
     <h1>
       Developing cheats<br>shouldn't be <span class="hard">hard</span>
     </h1>
     <div class="enter-railrip">Enter RailRip</div>
     <p class="subheader">
-      World's first anticheat bypass as a service.<br>
+      World's first <span style="color:var(--accent);font-weight:700;">anticheat bypass as a service</span>.<br>
       Reverse-engineered VNC protocols. One API. Zero footprint on the end user's machine.
     </p>
     <div class="hero-buttons">
@@ -1272,20 +1327,22 @@ ul { list-style: none; }
       <div class="result-visual reveal-left">
         <div class="result-diagram">
           <div class="diagram-box user-box">
-            👤 End User's Machine
-            <br><small style="color:var(--text-muted);font-weight:400">Only runs a VNC client — 100% legitimate</small>
-            <div class="diagram-label">VNC stream ↓</div>
+            <i class="fas fa-desktop"></i> User's Machine
+            <br><small style="color:var(--text-muted);font-weight:400">Game client + TightVNC server + EasyAntiCheat</small>
           </div>
-          <div class="diagram-arrow"></div>
+          <div class="diagram-arrow-bi">
+            <span class="dab-label">VPN tunnel + VNC input</span>
+          </div>
           <div class="diagram-box cloud-box">
-            ☁️ RailRip Cloud
-            <br><small style="color:var(--text-secondary);font-weight:400">Your cheat runs here, accesses game data via API</small>
-            <div class="diagram-label">Packets, Video, Input ↕</div>
+            <i class="fas fa-cloud"></i> RailRip Cloud
+            <br><small style="color:var(--text-secondary);font-weight:400">Your cheat software + packet sniffer + TightVNC client</small>
           </div>
-          <div class="diagram-arrow"></div>
+          <div class="diagram-arrow-bi">
+            <span class="dab-label">Game traffic (rerouted)</span>
+          </div>
           <div class="diagram-box game-box">
-            🎮 Game Client
-            <br><small style="color:var(--text-muted);font-weight:400">Game runs on our server, rerouted traffic</small>
+            <i class="fas fa-globe"></i> Game Server
+            <br><small style="color:var(--text-muted);font-weight:400">All traffic passes through RailRip — fully transparent</small>
           </div>
         </div>
       </div>
@@ -1299,22 +1356,22 @@ ul { list-style: none; }
         </p>
         <div class="result-features">
           <div class="result-feature reveal" style="--i:0">
-            <div class="icon">📡</div>
+            <div class="icon"><i class="fas fa-satellite-dish"></i></div>
             <h4>Traffic Rerouting</h4>
             <p>Automatic VPN tunneling and network rerouting for seamless packet flow.</p>
           </div>
           <div class="result-feature reveal" style="--i:1">
-            <div class="icon">📦</div>
+            <div class="icon"><i class="fas fa-box-open"></i></div>
             <h4>Packet Management</h4>
             <p>Intercept, inspect, and manipulate game network packets in real time.</p>
           </div>
           <div class="result-feature reveal" style="--i:2">
-            <div class="icon">🖱️</div>
+            <div class="icon"><i class="fas fa-mouse"></i></div>
             <h4>Input Injection</h4>
             <p>Mouse &amp; keyboard input manipulation sent back to the user's game client.</p>
           </div>
           <div class="result-feature reveal" style="--i:3">
-            <div class="icon">📺</div>
+            <div class="icon"><i class="fas fa-video"></i></div>
             <h4>Video Streaming</h4>
             <p>Receive the game's video stream for computer vision and analysis.</p>
           </div>
@@ -1342,8 +1399,7 @@ ul { list-style: none; }
         <div class="step-num">01</div>
         <h3>Deploy Your Software</h3>
         <p>
-          Ship your cheat binary or script to run on our cloud machines. It executes alongside
-          the game client in our infrastructure — never on the end user's device.
+          Ship your cheat binary or script to run on our cloud machines. It runs on our dedicated infrastructure, completely separated from the game client — never on the end user's device.
         </p>
       </div>
       <div class="how-step reveal" style="--i:1">
@@ -1387,7 +1443,7 @@ ul { list-style: none; }
     </div>
     <div class="audience-cards">
       <div class="audience-card reveal-left">
-        <div class="card-icon">🔧</div>
+        <div class="card-icon"><i class="fas fa-code"></i></div>
         <h3>Cheat Developers</h3>
         <p>
           You want a reliable, ready-made anticheat bypass without having to reverse-engineer
@@ -1396,7 +1452,7 @@ ul { list-style: none; }
         </p>
       </div>
       <div class="audience-card reveal-right">
-        <div class="card-icon">⚡</div>
+        <div class="card-icon"><i class="fas fa-plug"></i></div>
         <h3>Plug-and-Play Integration</h3>
         <p>
           No need to maintain your own bypass infrastructure. Our API is straightforward:
@@ -1427,7 +1483,7 @@ ul { list-style: none; }
     </div>
     <div class="ship-steps stagger-children">
       <div class="ship-step reveal" style="--i:0">
-        <div class="step-icon">📥</div>
+        <div class="step-icon"><i class="fas fa-download"></i></div>
         <h3>Download a VNC Client</h3>
         <p>
           Users install any supported VNC client to connect to the cloud session where
@@ -1440,7 +1496,7 @@ ul { list-style: none; }
         </div>
       </div>
       <div class="ship-step reveal" style="--i:1">
-        <div class="step-icon">🔒</div>
+        <div class="step-icon"><i class="fas fa-shield-halved"></i></div>
         <h3>Auto-Configure VPN</h3>
         <p>
           Windows users are automatically configured with a built-in VPN connection to our servers,
@@ -1448,7 +1504,7 @@ ul { list-style: none; }
         </p>
       </div>
       <div class="ship-step reveal" style="--i:2">
-        <div class="step-icon">📜</div>
+        <div class="step-icon"><i class="fas fa-scroll"></i></div>
         <h3>Installation Scripts</h3>
         <p>
           We provide fully open-source installation scripts that you can ship to your users.
@@ -1473,10 +1529,10 @@ ul { list-style: none; }
     </div>
 
     <div class="info-sources">
-      <h3 class="reveal">📡 Information Sources</h3>
+      <h3 class="reveal"><i class="fas fa-satellite-dish"></i> Information Sources</h3>
       <div class="usecases-grid stagger-children">
         <div class="usecase-card reveal" style="--i:0">
-          <div class="uc-icon">📦</div>
+          <div class="uc-icon"><i class="fas fa-box-open"></i></div>
           <h3>Network Packets</h3>
           <p>
             Capture and analyze unencrypted game network packets. Read player positions,
@@ -1484,7 +1540,7 @@ ul { list-style: none; }
           </p>
         </div>
         <div class="usecase-card reveal" style="--i:1">
-          <div class="uc-icon">👁️</div>
+          <div class="uc-icon"><i class="fas fa-eye"></i></div>
           <h3>Video / Image Stream</h3>
           <p>
             Receive the game's visual output for computer vision processing. Run object detection,
@@ -1492,7 +1548,7 @@ ul { list-style: none; }
           </p>
         </div>
         <div class="usecase-card reveal" style="--i:2">
-          <div class="uc-icon">🔊</div>
+          <div class="uc-icon"><i class="fas fa-volume-high"></i></div>
           <h3>Audio Stream</h3>
           <p>
             Access the game's audio output for sound-based analysis. Detect footsteps,
@@ -1503,10 +1559,10 @@ ul { list-style: none; }
     </div>
 
     <div class="interaction-methods" style="margin-top:60px;">
-      <h3 class="reveal">🎮 Interaction Methods</h3>
+      <h3 class="reveal"><i class="fas fa-gamepad"></i> Interaction Methods</h3>
       <div class="usecases-grid stagger-children" style="grid-template-columns:1fr 1fr;">
         <div class="usecase-card reveal" style="--i:0">
-          <div class="uc-icon">📨</div>
+          <div class="uc-icon"><i class="fas fa-paper-plane"></i></div>
           <h3>Packet Manipulation</h3>
           <p>
             Send crafted packets or modify existing game network traffic. Spoof movements,
@@ -1514,7 +1570,7 @@ ul { list-style: none; }
           </p>
         </div>
         <div class="usecase-card reveal" style="--i:1">
-          <div class="uc-icon">🖱️</div>
+          <div class="uc-icon"><i class="fas fa-computer-mouse"></i></div>
           <h3>Mouse &amp; Keyboard Input</h3>
           <p>
             Inject mouse movements, clicks, and keyboard presses that are sent back to the
@@ -1553,13 +1609,17 @@ ul { list-style: none; }
 
       <!-- Browser Window / Live Demo -->
       <div class="browser-window reveal-right" id="browserDemo">
-        <div class="browser-toolbar">
-          <div class="browser-dots">
-            <div class="browser-dot r"></div>
-            <div class="browser-dot y"></div>
-            <div class="browser-dot g"></div>
+        <!-- Win11-style title bar (top bar only) -->
+        <div class="win11-titlebar">
+          <div class="win11-title">
+            <i class="fas fa-gamepad" style="color:var(--accent)"></i>
+            Albion Online — game-session.railrip.cloud
           </div>
-          <div class="browser-url">🔒 game-session.railrip.cloud/live</div>
+          <div class="win11-controls">
+            <button class="win11-btn" title="Minimize"><i class="fas fa-minus"></i></button>
+            <button class="win11-btn" title="Maximize"><i class="far fa-square"></i></button>
+            <button class="win11-btn win11-close" title="Close"><i class="fas fa-times"></i></button>
+          </div>
         </div>
         <div class="browser-canvas-wrap">
           <canvas id="demoCanvas"></canvas>
@@ -1568,6 +1628,7 @@ ul { list-style: none; }
               <path d="M4 2L20 12L12 14L8 22L4 2Z" fill="white" stroke="black" stroke-width="1"/>
             </svg>
             <div class="cursor-click-ring" id="clickRing"></div>
+            <div class="cursor-label">RailRip</div>
           </div>
         </div>
       </div>
@@ -1586,7 +1647,7 @@ ul { list-style: none; }
     </div>
     <div class="casestudy-layout">
       <div class="casestudy-visual reveal-left">
-        <div class="casestudy-logo">🤖 OryxBot</div>
+        <div class="casestudy-logo">OryxBot</div>
         <div class="casestudy-url"><a href="https://oryxbot.com" target="_blank">oryxbot.com</a></div>
         <div class="casestudy-stats">
           <div class="casestudy-stat">
@@ -1661,7 +1722,8 @@ ul { list-style: none; }
         <div class="price-sub">per 10,000 requests</div>
         <ul class="plan-features">
           <li>Unlimited requests</li>
-          <li>All data streams included</li>
+          <li>Packet &amp; audio streams</li>
+          <li><strong style="color:var(--accent)">Video stream unlocked ✦</strong></li>
           <li>Input injection</li>
           <li>Balance-based billing</li>
           <li>Priority support</li>
@@ -1675,6 +1737,7 @@ ul { list-style: none; }
         <div class="price-sub">negotiable</div>
         <ul class="plan-features">
           <li>Volume discounts</li>
+          <li><strong style="color:var(--accent)">Video stream unlocked ✦</strong></li>
           <li>Dedicated infrastructure</li>
           <li>Custom SLAs</li>
           <li>Bring your own hardware</li>
@@ -1691,13 +1754,15 @@ ul { list-style: none; }
      ======================================== -->
 <footer class="footer">
   <div class="container">
-    <div class="footer-logo">🚂 Rail<span>Rip</span></div>
+    <div class="footer-logo"><i class="fas fa-train-subway"></i> Rail<span>Rip</span></div>
     <p>World's first anticheat bypass as a service.</p>
     <div class="footer-links">
-      <a href="#">Docs</a>
+      <a href="docs.html">Docs</a>
       <a href="#">API Reference</a>
       <a href="#">GitHub</a>
       <a href="#">Discord</a>
+      <a href="tos.html">Terms of Service</a>
+      <a href="privacy.html">Privacy Policy</a>
       <a href="#">Contact</a>
     </div>
     <p style="margin-top:32px;font-size:0.75rem;">© 2026 RailRip. All rights reserved.</p>
@@ -2160,6 +2225,22 @@ ul { list-style: none; }
 
   // Initial direction change
   setTimeout(changeDirection, 1500);
+})();
+
+// ============================================
+// Windows 11 clock
+// ============================================
+(function() {
+  function updateClock() {
+    const el = document.getElementById('win11Time');
+    if (!el) return;
+    const now = new Date();
+    const h = now.getHours().toString().padStart(2,'0');
+    const m = now.getMinutes().toString().padStart(2,'0');
+    el.textContent = h + ':' + m;
+  }
+  updateClock();
+  setInterval(updateClock, 10000);
 })();
 </script>
 </body>

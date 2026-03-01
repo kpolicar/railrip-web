@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service — RailRip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --bg-primary: #07070d;
+  --bg-secondary: #0e0e1a;
+  --accent: #ff6b35;
+  --text-primary: #e8e8f0;
+  --text-secondary: #9999b0;
+  --text-muted: #666680;
+  --border: #1e1e35;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.7;
+}
+
+/* Nav */
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 40px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7,7,13,0.9);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-logo {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-logo i { color: var(--accent); }
+.nav-logo span { color: var(--accent); }
+.nav-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-back:hover { color: var(--text-primary); }
+
+/* Layout */
+.page-wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 64px 24px 100px;
+}
+
+.page-header {
+  margin-bottom: 52px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--border);
+}
+.page-header h1 {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.page-header h1 span { color: var(--accent); }
+.page-meta {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+}
+.page-meta strong { color: var(--text-secondary); }
+
+/* Content */
+section {
+  margin-bottom: 40px;
+}
+section h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+section h2 i {
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+section p, section li {
+  font-size: 0.93rem;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+section ul {
+  padding-left: 20px;
+}
+section li { margin-bottom: 6px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.info-box {
+  background: rgba(255,107,53,0.06);
+  border: 1px solid rgba(255,107,53,0.18);
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 36px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.info-box i { color: var(--accent); margin-top: 2px; flex-shrink: 0; }
+
+footer {
+  text-align: center;
+  padding: 32px 24px;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+footer a { color: var(--text-muted); }
+footer a:hover { color: var(--text-primary); }
+
+.train-stripe {
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 24px, transparent 24px, transparent 32px);
+  opacity: 0.35;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index2.html" class="nav-logo">
+    <i class="fas fa-train-subway"></i>
+    Rail<span>Rip</span>
+  </a>
+  <a href="index2.html" class="nav-back">
+    <i class="fas fa-arrow-left"></i>
+    Back to home
+  </a>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <h1>Terms of <span>Service</span></h1>
+    <div class="page-meta">
+      Effective date: <strong>1 January 2025</strong> &nbsp;&middot;&nbsp; Last updated: <strong>1 June 2025</strong>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <i class="fas fa-circle-info"></i>
+    <div>
+      These Terms govern your use of the RailRip platform and API. By accessing or using our services, you agree to be bound by these Terms. If you do not agree, do not use our services.
+    </div>
+  </div>
+
+  <section>
+    <h2><i class="fas fa-file-contract"></i> 1. Service Description</h2>
+    <p>
+      RailRip ("we", "us", "our") provides an API-based service that enables remote execution of software on our cloud infrastructure, delivered to end users via encrypted VPN and VNC tunnelling technology. The service is intended for software developers and integrators.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-user-check"></i> 2. Eligibility &amp; Account</h2>
+    <p>You must be at least 18 years old and legally capable of entering into a binding contract to use this service. You are responsible for maintaining the confidentiality of your API key and account credentials. You must notify us immediately of any unauthorised use.</p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-circle-xmark"></i> 3. Acceptable Use</h2>
+    <p>You agree not to use RailRip to:</p>
+    <ul>
+      <li>Violate any applicable local, national, or European Union law or regulation;</li>
+      <li>Distribute malicious software or conduct cyberattacks against any third party;</li>
+      <li>Infringe the intellectual property rights of any person or entity;</li>
+      <li>Harass, harm, or threaten any individual;</li>
+      <li>Attempt to reverse-engineer, decompile, or circumvent our infrastructure.</li>
+    </ul>
+    <p>We reserve the right to suspend or terminate your account immediately for any breach of this section.</p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-credit-card"></i> 4. Subscription &amp; Payment</h2>
+    <p>
+      Subscriptions are billed monthly or annually as chosen at registration. All prices are stated in EUR and inclusive of applicable VAT for EU customers. Recurring payments are processed automatically at the start of each billing period. You may cancel your subscription at any time; cancellation takes effect at the end of the current period with no partial refunds unless required by law.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-rotate-left"></i> 5. Refund Policy</h2>
+    <p>
+      Under EU consumer law, if you are a consumer (not purchasing for business purposes) you have a 14-day right of withdrawal from the date of purchase, provided you have not made significant use of the service. Requests must be submitted via our support channel within this period.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-shield-halved"></i> 6. Limitation of Liability</h2>
+    <p>
+      To the maximum extent permitted by applicable law, RailRip shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of, or inability to use, the service. Our total aggregate liability to you shall not exceed the amount paid by you to RailRip in the three months preceding the event giving rise to the claim.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-screwdriver-wrench"></i> 7. Service Availability</h2>
+    <p>
+      We target 99.5% monthly uptime but do not provide a guaranteed SLA on Standard plans. Planned maintenance will be announced at least 24 hours in advance. We reserve the right to modify, suspend, or discontinue any aspect of the service with reasonable notice.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-gavel"></i> 8. Governing Law</h2>
+    <p>
+      These Terms are governed by the laws of the European Union and the member state in which RailRip is registered. Any disputes shall be subject to the exclusive jurisdiction of the competent courts of that member state. EU consumers retain the right to bring proceedings before the courts of their country of domicile and to use the EU Online Dispute Resolution platform at <a href="https://ec.europa.eu/consumers/odr" target="_blank">ec.europa.eu/consumers/odr</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-pen"></i> 9. Amendments</h2>
+    <p>
+      We may update these Terms from time to time. Material changes will be notified by email or via a notice in your dashboard at least 30 days before taking effect. Continued use of the service after the effective date constitutes acceptance.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-envelope"></i> 10. Contact</h2>
+    <p>
+      For questions regarding these Terms please contact us at <a href="mailto:legal@railrip.cloud">legal@railrip.cloud</a>.
+    </p>
+  </section>
+</div>
+
+<footer>
+  <div style="margin-bottom:8px">
+    <a href="index2.html">Home</a> &nbsp;&middot;&nbsp;
+    <a href="privacy.html">Privacy Policy</a> &nbsp;&middot;&nbsp;
+    <a href="docs.html">Docs</a> &nbsp;&middot;&nbsp;
+    <a href="register.html">Get Started</a>
+  </div>
+  &copy; 2025 RailRip. All rights reserved.
+</footer>
+<div class="train-stripe"></div>
+</body>
+</html>

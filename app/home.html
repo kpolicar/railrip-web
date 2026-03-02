@@ -847,6 +847,20 @@ ul { list-style: none; }
 .code-property { color: #8be9fd; }
 .code-number { color: #bd93f9; }
 .code-type { color: #8be9fd; font-style: italic; }
+.plug-code-editor { margin-top: 20px; }
+.plug-swap-line {
+  position: relative;
+  transition: background 0.35s;
+  border-radius: 4px;
+  padding: 0 6px;
+  margin: 0 -6px;
+  display: inline-block;
+  width: calc(100% + 12px);
+}
+.plug-swap-line.plug-swap-highlight-win32 { background: rgba(248, 113, 113, 0.15); }
+.plug-swap-line.plug-swap-highlight-rr   { background: rgba(74, 222, 128, 0.13); }
+.plug-swap-module { transition: color 0.3s; color: var(--red) !important; font-style: normal; }
+.plug-swap-railrip { color: var(--green) !important; font-style: normal; }
 
 /* Browser window (live demo) */
 .browser-window {
@@ -1479,18 +1493,35 @@ ul { list-style: none; }
             <span class="api-tag" style="background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.2);color:var(--green);">BattlEye</span>
           </div>
         </div>
+        <div class="limitation" style="margin-top:16px;">
+          <span>⚠️</span>
+          <span>Inherent network delay — latency depends on user's distance to our servers. Best suited for cheats where sub-10ms reaction time isn't critical.</span>
+        </div>
       </div>
       <div class="audience-card reveal-right">
         <div class="card-icon"><i class="fas fa-plug"></i></div>
         <h3>Plug-and-Play Integration</h3>
-        <p>
-          No need to maintain your own bypass infrastructure. Our API is straightforward:
-          subscribe to events, process data, send commands. Works with any language
-          that can make HTTP/WebSocket calls.
-        </p>
-        <div class="limitation">
-          <span>⚠️</span>
-          <span>Inherent network delay — latency depends on user's distance to our servers. Best suited for cheats where sub-10ms reaction time isn't critical.</span>
+        <p>Effortless migration for commonly used Win32 APIs and popular packet sniffing libraries.</p>
+        <div class="code-editor plug-code-editor">
+          <div class="code-titlebar">
+            <div class="code-dot red"></div>
+            <div class="code-dot yellow"></div>
+            <div class="code-dot green"></div>
+            <span class="code-filename">bot.py — drop-in replacements</span>
+          </div>
+          <div class="code-body" style="min-height:auto;padding:16px 20px;">
+            <div class="line typed"><span class="code-comment"># Swap the namespace — your code stays the same</span></div>
+            <div class="line typed">&nbsp;</div>
+            <div class="line typed"><span class="plug-swap-line" id="plugSwapLine1"><span class="code-keyword">import </span><span class="code-type plug-swap-module" id="plugSwapModule1">win32api</span><span class="code-keyword"> as </span><span class="code-variable">win32</span></span></div>
+            <div class="line typed"><span class="plug-swap-line" id="plugSwapLine2"><span class="code-keyword">import </span><span class="code-type plug-swap-module" id="plugSwapModule2">scapy.all</span><span class="code-keyword"> as </span><span class="code-variable">scapy</span></span></div>
+            <div class="line typed">&nbsp;</div>
+            <div class="line typed"><span class="code-comment"># Your existing code runs completely unchanged:</span></div>
+            <div class="line typed"><span class="code-variable">win32</span>.<span class="code-function">SendMessage</span>(<span class="code-variable">hwnd</span>, <span class="code-variable">WM_KEYDOWN</span>, <span class="code-variable">VK_W</span>, <span class="code-number">0</span>)</div>
+            <div class="line typed">&nbsp;</div>
+            <div class="line typed"><span class="code-keyword">def </span><span class="code-function">process_packet</span>(<span class="code-variable">pkt</span>):</div>
+            <div class="line typed">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-variable">print</span>(<span class="code-variable">pkt</span>.<span class="code-function">summary</span>())</div>
+            <div class="line typed"><span class="code-variable">scapy</span>.<span class="code-function">sniff</span>(<span class="code-variable">prn</span>=<span class="code-variable">process_packet</span>, <span class="code-variable">count</span>=<span class="code-number">10</span>)</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1531,6 +1562,9 @@ ul { list-style: none; }
           Windows users are automatically configured with a built-in VPN connection to our servers,
           rerouting all game traffic transparently.
         </p>
+        <div class="vnc-badges">
+          <span class="vnc-badge">Windows Built-in VPN</span>
+        </div>
       </div>
       <div class="ship-step reveal" style="--i:2">
         <div class="step-icon"><i class="fas fa-scroll"></i></div>
@@ -1617,7 +1651,7 @@ ul { list-style: none; }
 <section class="section demo-section" id="demo" style="background:var(--bg-secondary);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
   <div class="container">
     <div class="reveal" style="text-align:center;">
-      <div class="section-label">Live Demo</div>
+      <div class="section-label">Example</div>
       <h2 class="section-title">See it in <span class="highlight">action</span></h2>
       <p class="section-subtitle" style="margin:0 auto;">
         Subscribe to game events, detect the player's movement, and inject corrective mouse input — all through the RailRip API.
@@ -1630,7 +1664,7 @@ ul { list-style: none; }
           <div class="code-dot red"></div>
           <div class="code-dot yellow"></div>
           <div class="code-dot green"></div>
-          <span class="code-filename">cheat.js — RailRip SDK</span>
+          <span class="code-filename">cheat.py — RailRip SDK</span>
         </div>
         <div class="code-body" id="codeBody">
         </div>
@@ -1870,87 +1904,112 @@ ul { list-style: none; }
 // ============================================
 (function() {
   const codeLines = [
-    { text: '// Subscribe to game events via RailRip API', cls: 'comment' },
-    { text: 'const rr = new RailRip({ apiKey: "your-key" });', parts: [
-      { text: 'const ', cls: 'keyword' },
-      { text: 'rr', cls: 'variable' },
-      { text: ' = ', cls: 'operator' },
-      { text: 'new ', cls: 'keyword' },
-      { text: 'RailRip', cls: 'type' },
-      { text: '({ ', cls: '' },
-      { text: 'apiKey', cls: 'property' },
-      { text: ': ', cls: '' },
-      { text: '"your-key"', cls: 'string' },
-      { text: ' });', cls: '' },
+    { text: '# Subscribe to game events via RailRip API', cls: 'comment' },
+    { text: 'import railrip', parts: [
+      { text: 'import ', cls: 'keyword' },
+      { text: 'railrip', cls: 'type' },
     ]},
     { text: '' },
-    { text: '// Define where we want the player to go', cls: 'comment' },
-    { text: 'let targetPos = { x: 400, y: 250 };', parts: [
-      { text: 'let ', cls: 'keyword' },
-      { text: 'targetPos', cls: 'variable' },
-      { text: ' = { ', cls: '' },
-      { text: 'x', cls: 'property' },
+    { text: 'rr = railrip.Client(api_key="your-key")', parts: [
+      { text: 'rr', cls: 'variable' },
+      { text: ' = ', cls: 'operator' },
+      { text: 'railrip', cls: 'type' },
+      { text: '.', cls: '' },
+      { text: 'Client', cls: 'function' },
+      { text: '(', cls: '' },
+      { text: 'api_key', cls: 'property' },
+      { text: '=', cls: 'operator' },
+      { text: '"your-key"', cls: 'string' },
+      { text: ')', cls: '' },
+    ]},
+    { text: '' },
+    { text: '# Define where we want the player to go', cls: 'comment' },
+    { text: 'target_pos = {"x": 400, "y": 250}', parts: [
+      { text: 'target_pos', cls: 'variable' },
+      { text: ' = {', cls: '' },
+      { text: '"x"', cls: 'string' },
       { text: ': ', cls: '' },
       { text: '400', cls: 'number' },
       { text: ', ', cls: '' },
-      { text: 'y', cls: 'property' },
+      { text: '"y"', cls: 'string' },
       { text: ': ', cls: '' },
       { text: '250', cls: 'number' },
-      { text: ' };', cls: '' },
+      { text: '}', cls: '' },
     ]},
     { text: '' },
-    { text: '// Listen for player movement packets', cls: 'comment' },
-    { text: 'rr.on("packet:PlayerMove", (pkt) => {', parts: [
+    { text: '# Listen for player movement packets', cls: 'comment' },
+    { text: '@rr.on("packet:PlayerMove")', parts: [
+      { text: '@', cls: 'operator' },
       { text: 'rr', cls: 'variable' },
       { text: '.', cls: '' },
       { text: 'on', cls: 'function' },
       { text: '(', cls: '' },
       { text: '"packet:PlayerMove"', cls: 'string' },
-      { text: ', (', cls: '' },
-      { text: 'pkt', cls: 'variable' },
-      { text: ') => {', cls: 'operator' },
+      { text: ')', cls: '' },
     ]},
-    { text: '  const { x, y, direction } = pkt.player;', parts: [
-      { text: '  ', cls: '' },
-      { text: 'const ', cls: 'keyword' },
-      { text: '{ x, y, direction }', cls: 'variable' },
+    { text: 'def on_player_move(pkt):', parts: [
+      { text: 'def ', cls: 'keyword' },
+      { text: 'on_player_move', cls: 'function' },
+      { text: '(', cls: '' },
+      { text: 'pkt', cls: 'variable' },
+      { text: '):', cls: '' },
+    ]},
+    { text: '    x, y = pkt.player.x, pkt.player.y', parts: [
+      { text: '    ', cls: '' },
+      { text: 'x', cls: 'variable' },
+      { text: ', ', cls: '' },
+      { text: 'y', cls: 'variable' },
       { text: ' = ', cls: 'operator' },
       { text: 'pkt', cls: 'variable' },
       { text: '.', cls: '' },
       { text: 'player', cls: 'property' },
-      { text: ';', cls: '' },
-    ]},
-    { text: '' },
-    { text: '  // If player is heading the wrong way,', cls: 'comment' },
-    { text: '  // inject a mouse click to correct course', cls: 'comment' },
-    { text: '  if (direction !== getDesiredDir(targetPos)) {', parts: [
-      { text: '  ', cls: '' },
-      { text: 'if', cls: 'keyword' },
-      { text: ' (', cls: '' },
-      { text: 'direction', cls: 'variable' },
-      { text: ' !== ', cls: 'operator' },
-      { text: 'getDesiredDir', cls: 'function' },
-      { text: '(', cls: '' },
-      { text: 'targetPos', cls: 'variable' },
-      { text: ')) {', cls: '' },
-    ]},
-    { text: '    rr.injectMouse(targetPos.x, targetPos.y);', parts: [
-      { text: '    ', cls: '' },
-      { text: 'rr', cls: 'variable' },
-      { text: '.', cls: '' },
-      { text: 'injectMouse', cls: 'function' },
-      { text: '(', cls: '' },
-      { text: 'targetPos', cls: 'variable' },
       { text: '.', cls: '' },
       { text: 'x', cls: 'property' },
       { text: ', ', cls: '' },
-      { text: 'targetPos', cls: 'variable' },
+      { text: 'pkt', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'player', cls: 'property' },
       { text: '.', cls: '' },
       { text: 'y', cls: 'property' },
-      { text: ');', cls: '' },
     ]},
-    { text: '  }', cls: '' },
-    { text: '});', cls: '' },
+    { text: '    direction = pkt.player.direction', parts: [
+      { text: '    ', cls: '' },
+      { text: 'direction', cls: 'variable' },
+      { text: ' = ', cls: 'operator' },
+      { text: 'pkt', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'player', cls: 'property' },
+      { text: '.', cls: '' },
+      { text: 'direction', cls: 'property' },
+    ]},
+    { text: '' },
+    { text: '    # If player is heading the wrong way,', cls: 'comment' },
+    { text: '    # inject a mouse click to correct course', cls: 'comment' },
+    { text: '    if direction != get_desired_dir(target_pos):', parts: [
+      { text: '    ', cls: '' },
+      { text: 'if ', cls: 'keyword' },
+      { text: 'direction', cls: 'variable' },
+      { text: ' != ', cls: 'operator' },
+      { text: 'get_desired_dir', cls: 'function' },
+      { text: '(', cls: '' },
+      { text: 'target_pos', cls: 'variable' },
+      { text: '):', cls: '' },
+    ]},
+    { text: '        rr.inject_mouse(target_pos["x"], target_pos["y"])', parts: [
+      { text: '        ', cls: '' },
+      { text: 'rr', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'inject_mouse', cls: 'function' },
+      { text: '(', cls: '' },
+      { text: 'target_pos', cls: 'variable' },
+      { text: '[', cls: '' },
+      { text: '"x"', cls: 'string' },
+      { text: '], ', cls: '' },
+      { text: 'target_pos', cls: 'variable' },
+      { text: '[', cls: '' },
+      { text: '"y"', cls: 'string' },
+      { text: '])', cls: '' },
+    ]},
   ];
 
   const codeBody = document.getElementById('codeBody');
@@ -2304,6 +2363,49 @@ ul { list-style: none; }
   }
   updateClock();
   setInterval(updateClock, 10000);
+})();
+
+// ============================================
+// Plug-and-Play swap animation
+// ============================================
+(function() {
+  const mod1 = document.getElementById('plugSwapModule1');
+  const line1 = document.getElementById('plugSwapLine1');
+  const mod2 = document.getElementById('plugSwapModule2');
+  const line2 = document.getElementById('plugSwapLine2');
+  if (!mod1 || !line1 || !mod2 || !line2) return;
+
+  const states = [
+    { m1: 'win32api',      m2: 'scapy.all',      railrip: false },
+    { m1: 'railrip.win32', m2: 'railrip.scapy',   railrip: true  },
+  ];
+  let idx = 0;
+
+  function doSwap() {
+    idx = (idx + 1) % states.length;
+    const state = states[idx];
+    const hlClass = state.railrip ? 'plug-swap-highlight-rr' : 'plug-swap-highlight-win32';
+    line1.classList.add(hlClass);
+    line2.classList.add(hlClass);
+    setTimeout(function() {
+      mod1.textContent = state.m1;
+      mod2.textContent = state.m2;
+      var cls = 'code-type plug-swap-module' + (state.railrip ? ' plug-swap-railrip' : '');
+      mod1.className = cls;
+      mod2.className = cls;
+      setTimeout(function() { line1.classList.remove(hlClass); line2.classList.remove(hlClass); }, 350);
+    }, 200);
+  }
+
+  const obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        obs.unobserve(entry.target);
+        setTimeout(function() { setInterval(doSwap, 2200); }, 900);
+      }
+    });
+  }, { threshold: 0.6 });
+  obs.observe(line1);
 })();
 </script>
 </body>

@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
 /* ============================================
    CSS CUSTOM PROPERTIES
@@ -1197,6 +1198,15 @@ ul { list-style: none; }
 </style>
 </head>
 <body>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DM52T5V46X"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DM52T5V46X');
+</script>
 
 <!-- ========================================
      TRAIN BANNER
@@ -1758,9 +1768,9 @@ ul { list-style: none; }
     <p>World's first anticheat bypass as a service.</p>
     <div class="footer-links">
       <a href="docs.html">Docs</a>
-      <a href="#">API Reference</a>
-      <a href="#">GitHub</a>
-      <a href="#">Discord</a>
+      <a href="#restricted" onclick="showPage('restricted');return false">API Reference</a>
+      <a href="#restricted" onclick="showPage('restricted');return false">GitHub</a>
+      <a href="#restricted" onclick="showPage('restricted');return false">Discord</a>
       <a href="tos.html">Terms of Service</a>
       <a href="privacy.html">Privacy Policy</a>
       <a href="#">Contact</a>
@@ -1878,16 +1888,6 @@ ul { list-style: none; }
     ]},
     { text: '  }', cls: '' },
     { text: '});', cls: '' },
-    { text: '' },
-    { text: '// Start the session', cls: 'comment' },
-    { text: 'rr.connect("session-abc123");', parts: [
-      { text: 'rr', cls: 'variable' },
-      { text: '.', cls: '' },
-      { text: 'connect', cls: 'function' },
-      { text: '(', cls: '' },
-      { text: '"session-abc123"', cls: 'string' },
-      { text: ');', cls: '' },
-    ]},
   ];
 
   const codeBody = document.getElementById('codeBody');

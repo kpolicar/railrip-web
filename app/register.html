@@ -539,7 +539,7 @@ select.input-field option { background: #0e0e1a; }
   <div class="left-bg-grid"></div>
   <div class="train-stripe"></div>
 
-  <a href="index2.html" class="left-logo">
+  <a href="index.html" class="left-logo">
     🚂 Rail<span>Rip</span>
   </a>
 
@@ -572,7 +572,7 @@ select.input-field option { background: #0e0e1a; }
   </div>
 
   <div class="left-footer">
-    Already have an account? <a href="#" style="color:var(--accent);">Sign in</a>
+    Already have an account? <a href="login.html" style="color:var(--accent);">Sign in</a>
   </div>
 </div>
 
@@ -633,13 +633,17 @@ select.input-field option { background: #0e0e1a; }
           <div class="input-error" id="userCountError">Please select an expected user count.</div>
         </div>
 
+        <div id="clerk-captcha" data-cl-theme="dark" data-cl-size="flexible" style="margin-top:8px;"></div>
+
         <button class="submit-btn" id="step1Btn" onclick="submitStep1()">
           <span class="btn-text">Continue →</span>
           <div class="btn-spinner"></div>
         </button>
 
+        <div class="input-error" id="step1ServerError" style="margin-top:10px;"></div>
+
         <p class="fine-print">
-          By continuing you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+          By continuing you agree to our <a href="tos.html">Terms of Service</a> and <a href="#">Privacy Policy</a>.
         </p>
       </div>
 
@@ -770,11 +774,148 @@ function showError(inputId, errorId, show) {
   }
 }
 
-function submitStep1() {
+const CLERK_PUBLISHABLE_KEY = (
+  window.RAILRIP_CLERK_PUBLISHABLE_KEY ||
+  window.CLERK_PUBLISHABLE_KEY ||
+  localStorage.getItem('RAILRIP_CLERK_PUBLISHABLE_KEY') ||
+  ''
+).trim();
+
+let clerkInstance = null;
+let createdClerkUserId = null;
+
+function showStep1ServerError(message) {
+  const err = document.getElementById('step1ServerError');
+  err.textContent = message || '';
+  err.classList.toggle('visible', Boolean(message));
+}
+
+async function getClerkInstance() {
+  if (clerkInstance) return clerkInstance;
+  if (!CLERK_PUBLISHABLE_KEY) {
+    throw new Error('Signup is unavailable right now. Clerk publishable key is missing.');
+  }
+  if (window.location.protocol === 'file:') {
+    throw new Error('Clerk requires an HTTP(S) origin. Serve this SPA via localhost (for example, http://localhost:5500) instead of opening index.html directly.');
+  }
+  const loadScriptIfNeeded = () => new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[data-railrip-clerk="1"]');
+    if (existing) {
+      if (!existing.getAttribute('data-clerk-publishable-key')) {
+        existing.setAttribute('data-clerk-publishable-key', CLERK_PUBLISHABLE_KEY);
+      }
+      if (window.Clerk) {
+        resolve();
+        return;
+      }
+      existing.addEventListener('load', resolve, { once: true });
+      existing.addEventListener('error', () => reject(new Error('Failed to load Clerk SDK.')), { once: true });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js';
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    script.setAttribute('data-railrip-clerk', '1');
+    script.setAttribute('data-clerk-publishable-key', CLERK_PUBLISHABLE_KEY);
+    script.onload = resolve;
+    script.onerror = () => reject(new Error('Failed to load Clerk SDK.'));
+    document.head.appendChild(script);
+  });
+
+  if (!window.Clerk) await loadScriptIfNeeded();
+  if (!window.Clerk) {
+    throw new Error('Clerk SDK is unavailable right now. Please refresh and try again.');
+  }
+
+  await window.Clerk.load();
+  clerkInstance = window.Clerk;
+  return clerkInstance;
+}
+
+async function createClerkUser(email, password, userCount) {
+  const clerk = await getClerkInstance();
+  const result = await clerk.client.signUp.create({
+    emailAddress: email,
+    password,
+    unsafeMetadata: {
+      expectedActiveUsers: userCount,
+    },
+  });
+
+  const emailVerification = result && result.verifications ? result.verifications.email_address : null;
+  const emailNeedsVerification =
+    result &&
+    result.status !== 'complete' &&
+    (
+      (Array.isArray(result.unverifiedFields) && result.unverifiedFields.includes('email_address')) ||
+      (emailVerification && emailVerification.status && emailVerification.status !== 'verified')
+    );
+
+  if (emailNeedsVerification) {
+    await clerk.client.signUp.prepareEmailAddressVerification();
+  }
+
+  if (result && result.status === 'complete') {
+    createdClerkUserId = result.id;
+  }
+
+  return result;
+}
+
+function readClerkError(error) {
+  const first = error && error.errors && error.errors[0] ? error.errors[0] : null;
+  const status = error && (error.status || error.statusCode);
+  const code = String((first && first.code) || '').toLowerCase();
+  const message = (first && (first.longMessage || first.message)) || (error && error.message) || '';
+
+  if (code.includes('captcha') || /captcha|turnstile|bot/i.test(message)) {
+    return 'CAPTCHA verification failed. Please complete the challenge again and retry.';
+  }
+
+  if (status === 401 || /unauthorized|not authorized|forbidden/i.test(message)) {
+    return 'Clerk rejected this request (401). Confirm your publishable key belongs to this Clerk instance and add this site origin to Clerk allowed origins for your environment.';
+  }
+
+  if (/origin|domain|host/i.test(message) && /not allowed|not authorized|invalid/i.test(message)) {
+    return 'This origin is not allowed by Clerk. Add your current app URL to Clerk allowed origins and try again.';
+  }
+
+  if (first && first.longMessage) return first.longMessage;
+  if (first && first.message) return first.message;
+  return error && error.message ? error.message : 'Unable to create your account right now. Please try again.';
+}
+
+function isCaptchaFailure(error) {
+  const first = error && error.errors && error.errors[0] ? error.errors[0] : null;
+  const code = String((first && first.code) || '').toLowerCase();
+  const message = String((first && (first.longMessage || first.message)) || (error && error.message) || '').toLowerCase();
+  const status = error && (error.status || error.statusCode);
+  if (status === 401 || status === 403) return true;
+  return code.includes('captcha') || message.includes('captcha') || message.includes('turnstile') || message.includes('bot') || message.includes('unauthorized');
+}
+
+function focusCaptchaForRetry() {
+  const captcha = document.getElementById('clerk-captcha');
+  if (!captcha) return;
+  captcha.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const previousOutline = captcha.style.outline;
+  const previousOutlineOffset = captcha.style.outlineOffset;
+  captcha.style.outline = '2px solid var(--red)';
+  captcha.style.outlineOffset = '6px';
+  setTimeout(() => {
+    captcha.style.outline = previousOutline;
+    captcha.style.outlineOffset = previousOutlineOffset;
+  }, 1800);
+}
+
+async function submitStep1() {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const userCount = document.getElementById('userCount').value;
   let valid = true;
+  showStep1ServerError('');
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     showError('email', 'emailError', true); valid = false;
@@ -794,10 +935,32 @@ function submitStep1() {
   const btn = document.getElementById('step1Btn');
   btn.classList.add('loading');
 
-  setTimeout(() => {
+  try {
+    let signupResult = null;
+    if (!createdClerkUserId) {
+      signupResult = await createClerkUser(email, password, userCount);
+    }
+
+    if (!createdClerkUserId) {
+      btn.classList.remove('loading');
+      const status = signupResult && signupResult.status ? signupResult.status : 'incomplete';
+      showStep1ServerError(`Signup not completed yet (status: ${status}). Please complete verification and try again.`);
+      return;
+    }
+
+    setTimeout(() => {
+      btn.classList.remove('loading');
+      transitionToStep2();
+    }, 500);
+  } catch (error) {
     btn.classList.remove('loading');
-    transitionToStep2();
-  }, 700);
+    if (isCaptchaFailure(error)) {
+      focusCaptchaForRetry();
+      showStep1ServerError('CAPTCHA verification failed. Please complete the challenge again and click Continue.');
+      return;
+    }
+    showStep1ServerError(readClerkError(error));
+  }
 }
 
 function transitionToStep2() {
@@ -834,7 +997,7 @@ function transitionToStep2() {
 // ============================================
 // Step 2 validation & success
 // ============================================
-function submitStep2() {
+async function submitStep2() {
   const cardName = document.getElementById('cardName').value.trim();
   const cardNum = document.getElementById('cardNum').value.replace(/\s/g,'');
   const cardExp = document.getElementById('cardExp').value;
@@ -864,7 +1027,36 @@ function submitStep2() {
   const btn = document.getElementById('step2Btn');
   btn.classList.add('loading');
 
+  // Update unsafeMetadata with payment intent flag
+  try {
+    const clerk = await getClerkInstance();
+
+    // Ensure the session from signup is active so clerk.user is available
+    if (!clerk.user && createdClerkUserId) {
+      const sessions = clerk.client && clerk.client.sessions;
+      const activeSession = sessions && sessions.length > 0 ? sessions[sessions.length - 1] : null;
+      if (activeSession) {
+        await clerk.setActive({ session: activeSession.id });
+      }
+    }
+
+    if (clerk.user) {
+      const existing = clerk.user.unsafeMetadata || {};
+      await clerk.user.update({
+        unsafeMetadata: {
+          ...existing,
+          hasSubmittedPaymentIntent: true,
+        },
+      });
+    } else {
+      console.warn('Clerk user not available after session activation; skipping metadata update.');
+    }
+  } catch (metaErr) {
+    console.warn('Failed to update payment intent metadata:', metaErr);
+  }
+
   setTimeout(() => {
+    btn.classList.remove('loading');
     // Show success, hide everything else
     document.getElementById('stepProgress').style.display = 'none';
     document.getElementById('formsViewport').style.display = 'none';

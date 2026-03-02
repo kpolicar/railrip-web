@@ -1,672 +1,4531 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RailRip - Anticheat Bypass as a Service</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Open+Sans:wght@400;600&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* --- Global Variables & Reset --- */
-        :root {
-            --bg-main: #1A1E2E;
-            --bg-secondary: #252a40;
-            --accent-cyan: #00FFC2;
-            --accent-gold: #FFD700;
-            --accent-red: #FF5F56;
-            --text-light: #ffffff;
-            --text-dim: #a0aec0;
-            --track-color: #3E4C6A;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RailRip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ============================================================
+   SPA shell — hide inactive pages, give sub-pages full height
+   ============================================================ */
+.spa-page { min-height: 100vh; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: 'Open Sans', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-light);
-            overflow-x: hidden;
-        }
-        h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; font-weight: 700; }
-        a { text-decoration: none; color: inherit; }
-        ul { list-style: none; }
+/* ====== home.html ====== */
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .section-pad { padding: 80px 0; }
-        .highlight {
-            color: var(--bg-main);
-            background: var(--accent-cyan);
-            padding: 2px 10px;
-            border-radius: 4px;
-            display: inline-block;
-            transform: skew(-5deg);
-        }
+/* ============================================
+   CSS CUSTOM PROPERTIES
+   ============================================ */
+:root {
+  --bg-primary: #07070d;
+  --bg-secondary: #0e0e1a;
+  --bg-card: #111122;
+  --bg-card-hover: #161630;
+  --bg-code: #0d1117;
+  --accent: #ff6b35;
+  --accent-glow: rgba(255, 107, 53, 0.3);
+  --accent-dim: #cc5529;
+  --gold: #ffd700;
+  --text-primary: #e8e8f0;
+  --text-secondary: #9999b0;
+  --text-muted: #666680;
+  --track-color: #1a1a2e;
+  --track-steel: #3a3a55;
+  --border: #1e1e35;
+  --green: #4ade80;
+  --blue: #60a5fa;
+  --purple: #a78bfa;
+  --red: #f87171;
+  --pink: #f472b6;
+  --train-body: #e74c3c;
+  --train-accent: #f39c12;
+  --section-gap: 120px;
+  --max-width: 1200px;
+}
 
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .btn-primary {
-            background: var(--accent-cyan);
-            color: var(--bg-main);
-            box-shadow: 0 4px 15px rgba(0, 255, 194, 0.3);
-        }
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 255, 194, 0.5); }
-        .btn-secondary {
-            background: transparent;
-            border: 2px solid var(--accent-cyan);
-            color: var(--accent-cyan);
-            margin-left: 10px;
-        }
-        .btn-secondary:hover { background: rgba(0, 255, 194, 0.1); }
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--gold); }
+img { max-width: 100%; }
+ul { list-style: none; }
 
-        /* Scroll Animation Classes */
-        .hidden { opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
-        .show { opacity: 1; transform: translateY(0); }
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--track-steel); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-        /* --- Header --- */
-        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
-        .logo { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.5rem; display: flex; align-items: center; }
-        .logo i { color: var(--accent-cyan); margin-right: 10px; }
-        nav ul { display: flex; gap: 30px; }
-        nav a { font-weight: 600; font-size: 0.9rem; transition: color 0.3s; }
-        nav a:hover { color: var(--accent-cyan); }
+/* ============================================
+   UTILITIES
+   ============================================ */
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+.section { padding: var(--section-gap) 0; position: relative; }
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+.section-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.7;
+}
+.highlight { color: var(--accent); position: relative; }
+.highlight::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 100%; height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+  opacity: 0.5;
+}
 
-        /* --- Hero Section --- */
-        #hero { min-height: 80vh; display: flex; align-items: center; position: relative; overflow: hidden; }
-        .hero-content { max-width: 700px; z-index: 2; }
-        h1 { font-size: 3.5rem; line-height: 1.2; margin-bottom: 20px; }
-        .subheader { font-size: 1.2rem; color: var(--text-dim); margin-bottom: 40px; }
+/* ============================================
+   SCROLL ANIMATIONS
+   ============================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-left.visible { opacity: 1; transform: translateX(0); }
+.reveal-right {
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-right.visible { opacity: 1; transform: translateX(0); }
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal-scale.visible { opacity: 1; transform: scale(1); }
 
-        .track-bg {
-            position: absolute; width: 200%; height: 100%; top: 60%; left: -50%;
-            background: repeating-linear-gradient(90deg, var(--track-color) 0px, var(--track-color) 20px, transparent 20px, transparent 40px);
-            opacity: 0.1; transform: rotate(-10deg); animation: trackMove 20s linear infinite;
-        }
-        @keyframes trackMove { 0% { background-position: 0 0; } 100% { background-position: 1000px 0; } }
+/* Staggered children */
+.stagger-children .reveal { transition-delay: calc(var(--i, 0) * 0.1s); }
 
-        .train-animation-container {
-            position: absolute; top: 30%; right: 5%; width: 450px; height: 100px;
-            display: flex; align-items: center; justify-content: space-between; pointer-events: none;
-        }
-        .station { font-size: 60px; color: var(--track-color); position: relative; z-index: 2; }
-        .station-label {
-            position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%);
-            font-size: 12px; font-family: monospace; color: var(--accent-cyan); white-space: nowrap;
-        }
-        .data-train {
-            font-size: 40px; color: var(--accent-cyan); position: absolute; z-index: 3;
-            animation: cloudCommute 5s infinite ease-in-out;
-        }
-        .train-track-line {
-            position: absolute; top: 50%; left: 40px; right: 40px; height: 4px;
-            background: repeating-linear-gradient(90deg, var(--track-color) 0px, var(--track-color) 10px, transparent 10px, transparent 20px);
-            transform: translateY(-50%); z-index: 1;
-        }
-        @keyframes cloudCommute {
-            0% { left: 60px; transform: scaleX(1); } 45% { left: 340px; transform: scaleX(1); }
-            50% { left: 340px; transform: scaleX(-1); } 95% { left: 60px; transform: scaleX(-1); }
-            100% { left: 60px; transform: scaleX(1); }
-        }
+/* ============================================
+   TRAIN BANNER (TOP)
+   ============================================ */
+.train-banner {
+  width: 100%;
+  height: 80px;
+  background: var(--bg-secondary);
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+}
+.train-tracks {
+  position: absolute;
+  bottom: 18px;
+  left: 0;
+  width: 200%;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, var(--track-steel) 0px, var(--track-steel) 30px, transparent 30px, transparent 40px);
+  animation: tracksScroll 2s linear infinite;
+}
+.train-tracks::before {
+  content: '';
+  position: absolute;
+  top: -4px; left: 0;
+  width: 100%; height: 2px;
+  background: var(--track-steel);
+}
+.train-tracks::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 100%; height: 2px;
+  background: var(--track-steel);
+}
+@keyframes tracksScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-40px); } }
 
-        .rail-separator { text-align: center; color: var(--track-color); font-size: 2rem; margin: -20px 0; opacity: 0.3; }
+.train-wrapper {
+  position: absolute;
+  bottom: 26px;
+  animation: trainBounce 0.4s ease-in-out infinite alternate, trainMove 18s linear infinite;
+  z-index: 2;
+}
+@keyframes trainBounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-3px); }
+}
+@keyframes trainMove {
+  0% { left: -220px; }
+  100% { left: calc(100% + 50px); }
+}
 
-        /* --- Academic Backing --- */
-        .academic-box {
-            background: rgba(0, 255, 194, 0.05); border-left: 4px solid var(--accent-cyan);
-            padding: 30px; border-radius: 0 10px 10px 0; margin-bottom: 60px;
-        }
-        .academic-box h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: var(--accent-cyan); }
-        .academic-box p { font-size: 1rem; line-height: 1.6; color: var(--text-dim); margin-bottom: 10px; }
+.train-engine {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+.train-loco {
+  width: 50px; height: 32px;
+  background: var(--train-body);
+  border-radius: 4px 12px 2px 2px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(231,76,60,0.4);
+}
+.train-loco::before {
+  content: '';
+  position: absolute;
+  top: -14px; left: 10px;
+  width: 10px; height: 14px;
+  background: var(--train-accent);
+  border-radius: 3px 3px 0 0;
+}
+.train-loco::after {
+  content: '🚂';
+  position: absolute;
+  top: 2px; right: 4px;
+  font-size: 10px;
+}
+.train-window {
+  position: absolute;
+  top: 6px; left: 22px;
+  width: 14px; height: 10px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.train-car {
+  width: 40px; height: 26px;
+  background: var(--train-accent);
+  border-radius: 3px;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(243,156,18,0.3);
+}
+.train-car::before {
+  content: '';
+  position: absolute;
+  top: 5px; left: 5px; right: 5px; bottom: 5px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+}
+.train-wheel {
+  position: absolute;
+  bottom: -5px;
+  width: 8px; height: 8px;
+  background: #333;
+  border-radius: 50%;
+  border: 1.5px solid #666;
+  animation: wheelSpin 0.3s linear infinite;
+}
+.train-wheel.w1 { left: 4px; }
+.train-wheel.w2 { right: 4px; }
+@keyframes wheelSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- Who Is It For --- */
-        .who-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
-        .result-box {
-            background: var(--bg-secondary); border: 1px solid var(--track-color);
-            padding: 30px; border-radius: 10px; position: relative;
-        }
-        .result-box i { color: var(--accent-cyan); font-size: 2rem; margin-bottom: 15px; }
+/* Smoke puffs */
+.smoke-container {
+  position: absolute;
+  top: -28px; left: 12px;
+}
+.smoke-puff {
+  position: absolute;
+  width: 12px; height: 12px;
+  background: rgba(200, 200, 220, 0.6);
+  border-radius: 50%;
+  animation: smokePuff 1.5s ease-out infinite;
+}
+.smoke-puff:nth-child(2) { animation-delay: 0.4s; left: -5px; }
+.smoke-puff:nth-child(3) { animation-delay: 0.8s; left: -10px; }
+@keyframes smokePuff {
+  0% { opacity: 0.7; transform: translateY(0) scale(0.5); }
+  100% { opacity: 0; transform: translateY(-30px) translateX(-20px) scale(1.5); }
+}
 
-        /* --- Architecture Diagram --- */
-        .diagram-container { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 60px; position: relative; }
-        .diagram-step { text-align: center; flex: 1; position: relative; z-index: 2; background: var(--bg-main); padding: 20px; }
-        .step-icon {
-            width: 80px; height: 80px; background: var(--bg-secondary); border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2rem;
-            color: var(--accent-cyan); border: 2px solid var(--track-color);
-        }
-        .diagram-connector {
-            position: absolute; top: 60px; left: 15%; width: 70%; height: 4px;
-            background: var(--track-color); z-index: 1; overflow: hidden;
-        }
-        .diagram-connector::after {
-             content: ''; position: absolute; top: 0; left: 0; width: 30%; height: 100%;
-             background: var(--accent-cyan); animation: connectionFlow 3s linear infinite;
-        }
-        @keyframes connectionFlow { 0% { left: -30%; } 100% { left: 100%; } }
+/* Scenery */
+.scenery {
+  position: absolute;
+  top: 0; left: 0;
+  width: 200%; height: 100%;
+  animation: sceneryMove 12s linear infinite;
+}
+.scenery-item {
+  position: absolute;
+  bottom: 32px;
+  font-size: 16px;
+  opacity: 0.3;
+}
+@keyframes sceneryMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* --- Capabilities Sections --- */
-        .capabilities-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 40px; margin-bottom: 80px;
-        }
-        .cap-card {
-            background: var(--bg-secondary); padding: 25px; border-radius: 12px;
-            border-top: 3px solid var(--accent-cyan);
-        }
-        .cap-card h4 { display: flex; align-items: center; gap: 10px; margin-bottom: 15px;}
-        .cap-card i { color: var(--accent-gold); }
+/* ============================================
+   NAV
+   ============================================ */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: rgba(7, 7, 13, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: transform 0.3s;
+}
+.nav-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+.nav-logo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-logo span { color: var(--accent); }
+.nav-logo .logo-icon { font-size: 1.1rem; }
+.nav-links { display: flex; gap: 28px; align-items: center; }
+.nav-links a {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text-primary); }
+.nav-cta {
+  background: var(--accent) !important;
+  color: #fff !important;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: 600 !important;
+  font-size: 0.85rem;
+  transition: background 0.2s, transform 0.15s !important;
+}
+.nav-cta:hover { background: var(--accent-dim) !important; transform: translateY(-1px); }
 
-        /* --- API Showcase (Editor + Demo) --- */
-        .showcase-layout {
-            display: grid; 
-            /* Make the widget larger than the code snippet */
-            grid-template-columns: 1.2fr 1.8fr; 
-            gap: 40px; align-items: stretch; margin-top: 40px;
-        }
+/* ============================================
+   HERO
+   ============================================ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 140px 24px 100px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,107,53,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255,215,0,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 50% at 50% 50%, black 30%, transparent 100%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 2; max-width: 800px; }
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,107,53,0.1);
+  border: 1px solid rgba(255,107,53,0.2);
+  padding: 6px 16px;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 32px;
+  animation: badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,53,0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(255,107,53,0); }
+}
+.hero h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -2px;
+  margin-bottom: 16px;
+}
+.hero h1 .hard {
+  color: var(--accent);
+  font-style: italic;
+  position: relative;
+}
+.hero h1 .hard::after {
+  content: '';
+  position: absolute;
+  bottom: 4px; left: -4px; right: -4px;
+  height: 6px;
+  background: var(--accent);
+  opacity: 0.25;
+  border-radius: 3px;
+}
+.hero .enter-railrip {
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  color: var(--gold);
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+}
+.hero .subheader {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-bottom: 44px;
+  line-height: 1.6;
+}
+.hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.btn {
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(255,107,53,0.3);
+}
+.btn-primary:hover {
+  background: var(--accent-dim);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(255,107,53,0.4);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1.5px solid var(--border);
+}
+.btn-outline:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
 
-        /* The Code Editor */
-        .editor-container {
-            background: #0f111a; border-radius: 8px; border: 1px solid #333;
-            overflow: hidden; display: flex; flex-direction: column; font-family: 'Fira Code', monospace;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4); height: 100%; min-height: 400px;
-        }
-        .editor-header {
-            background: #1e2233; padding: 10px 15px; display: flex; align-items: center; border-bottom: 1px solid #333;
-        }
-        .editor-dots { display: flex; gap: 6px; margin-right: 15px; }
-        .editor-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .editor-tab { color: #a0aec0; font-size: 0.85rem; }
-        .editor-content { padding: 20px; font-size: 0.9rem; line-height: 1.6; color: #a0aec0; }
-        
-        /* Syntax highlighting colors */
-        .sy-keyword { color: #c678dd; }
-        .sy-obj { color: #e5c07b; }
-        .sy-prop { color: #61afef; }
-        .sy-str { color: #98c379; }
-        .sy-comment { color: #5c6370; font-style: italic; }
-        .sy-op { color: #56b6c2; }
-        
-        .cursor-blink {
-            display: inline-block; width: 8px; height: 15px; background: var(--accent-cyan);
-            animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px;
-        }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+/* ============================================
+   THE RESULT
+   ============================================ */
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+  margin-top: 60px;
+}
+.result-visual {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.result-visual::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: conic-gradient(from 180deg, transparent, rgba(255,107,53,0.05), transparent 30%);
+  animation: resultRotate 8s linear infinite;
+}
+@keyframes resultRotate { 100% { transform: rotate(360deg); } }
+.result-diagram {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+}
+.diagram-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 24px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  width: 100%;
+  max-width: 280px;
+  position: relative;
+}
+.diagram-box.user-box { border-color: var(--green); color: var(--green); }
+.diagram-box.cloud-box { border-color: var(--accent); color: var(--accent); background: rgba(255,107,53,0.05); }
+.diagram-box.game-box { border-color: var(--blue); color: var(--blue); }
+.diagram-arrow-bi {
+  width: 2px;
+  min-height: 36px;
+  background: linear-gradient(to bottom, var(--accent), var(--blue));
+  position: relative;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.diagram-arrow-bi::before {
+  content: '▲';
+  position: absolute;
+  top: -8px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 7px;
+  color: var(--accent);
+}
+.diagram-arrow-bi::after {
+  content: '▼';
+  position: absolute;
+  bottom: -8px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 7px;
+  color: var(--blue);
+}
+.dab-label {
+  position: absolute;
+  left: 12px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  background: var(--bg-card);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.result-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 40px;
+}
+.result-feature {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.result-feature:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+.result-feature .icon { font-size: 1.4rem; margin-bottom: 8px; }
+.result-feature h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.result-feature p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
 
-        /* The Game Widget (Windows 11 Style) */
-        .win11-widget {
-            background: #202020; border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            overflow: hidden; display: flex; flex-direction: column; border: 1px solid #444; height: 100%; min-height: 400px;
-        }
-        .win11-header {
-            height: 32px; background: #1a1a1a; display: flex; justify-content: space-between; align-items: center; 
-            padding-left: 15px; user-select: none;
-        }
-        .win11-title {
-            font-size: 12px; color: #ccc; display: flex; align-items: center; gap: 8px; font-family: 'Segoe UI', sans-serif;
-        }
-        .win11-controls { display: flex; height: 100%; }
-        .win11-btn { 
-            width: 46px; height: 100%; display: flex; justify-content: center; align-items: center; color: #ccc; font-size: 10px; transition: 0.2s;
-        }
-        .win11-btn:hover { background: #333; }
-        .win11-btn.close:hover { background: #e81123; color: white; }
-        
-        /* Top-Down Game Container */
-        .game-screen {
-            flex-grow: 1; background-color: #2b3a31; position: relative; overflow: hidden;
-            background-image: linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
+/* ============================================
+   HOW IT WORKS
+   ============================================ */
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 60px;
+}
+.how-step {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  position: relative;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.how-step:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+}
+.step-num {
+  font-size: 3rem;
+  font-weight: 900;
+  color: rgba(255,107,53,0.1);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+.how-step h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.how-step p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.api-capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.api-tag {
+  background: rgba(255,107,53,0.1);
+  border: 1px solid rgba(255,107,53,0.2);
+  color: var(--accent);
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
 
-        /* Moving ground particles */
-        .game-particle {
-            position: absolute; width: 4px; height: 4px; background: rgba(255, 255, 255, 0.2); border-radius: 50%;
-        }
+/* ============================================
+   WHO IS IT FOR
+   ============================================ */
+.audience-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 60px;
+}
+.audience-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px;
+  transition: border-color 0.3s;
+}
+.audience-card:hover { border-color: var(--accent); }
+.audience-card .card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+.audience-card h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.audience-card p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.audience-card .limitation {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(248,113,113,0.05);
+  border: 1px solid rgba(248,113,113,0.15);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-        /* The Player (always centered) */
-        .game-player {
-            position: absolute; top: 50%; left: 50%; width: 34px; height: 34px;
-            background: #00FFC2; border-radius: 50%; transform: translate(-50%, -50%);
-            box-shadow: 0 0 15px rgba(0, 255, 194, 0.5); z-index: 10;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .game-player::after {
-            content: ''; position: absolute; top: -5px; left: 12px; width: 10px; height: 10px;
-            background: #fff; border-radius: 50%; border: 2px solid #333;
-        }
+/* ============================================
+   SHIP TO USERS
+   ============================================ */
+.ship-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 60px;
+}
+.ship-step {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s;
+}
+.ship-step:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+}
+.ship-step .step-icon {
+  width: 56px; height: 56px;
+  background: rgba(255,107,53,0.1);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin: 0 auto 20px;
+}
+.ship-step h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.ship-step p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.vnc-badges {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.vnc-badge {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
 
-        .game-target {
-            position: absolute; width: 24px; height: 24px; border: 2px solid rgba(255, 215, 0, 0.8);
-            border-radius: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; pointer-events: none;
-            transition: all 0.2s ease-out; z-index: 5;
-        }
-        .game-target.active { transform: translate(-50%, -50%) scale(1); opacity: 1; animation: pulseTarget 1s infinite; }
-        @keyframes pulseTarget { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }
+/* ============================================
+   USE CASES
+   ============================================ */
+.usecases-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+  margin-top: 60px;
+}
+.usecase-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  transition: all 0.3s;
+}
+.usecase-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+}
+.usecase-card .uc-icon {
+  font-size: 2rem;
+  margin-bottom: 16px;
+}
+.usecase-card h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.usecase-card p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.info-sources, .interaction-methods {
+  margin-top: 50px;
+}
+.info-sources h3, .interaction-methods h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
 
-        /* Fake Mouse Cursor */
-        .demo-cursor {
-            width: 24px; height: 24px; position: absolute; z-index: 20;
-            background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.65376 12.3673H5.46026L5.31717 12.4976L0.500002 16.8829L0.500002 1.19823L19.2641 12.3673H5.65376Z' fill='white' stroke='black'/%3E%3C/svg%3E");
-            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: none;
-            top: 20%; left: 20%;
-        }
-        .demo-cursor.clicking { transform: scale(0.8); }
+/* ============================================
+   LIVE DEMO + CODE EDITOR
+   ============================================ */
+.demo-section {
+  margin-top: 60px;
+}
+.demo-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+  margin-top: 40px;
+}
 
-        /* --- Case Study & Pricing --- */
-        .case-study-box {
-            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-main) 100%);
-            padding: 40px; border-radius: 20px; border: 1px solid var(--track-color);
-            display: flex; align-items: center; gap: 40px; margin-top: 50px;
-        }
-        .oryx-logo { font-size: 4rem; color: var(--accent-gold); }
-        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 60px; }
-        .price-card {
-            background: var(--bg-secondary); padding: 40px 30px; border-radius: 15px;
-            text-align: center; border-top: 5px solid var(--track-color); transition: transform 0.3s; position: relative;
-        }
-        .price-card:hover { transform: translateY(-10px); }
-        .price-card.popular {
-            border-top: 5px solid var(--accent-cyan);
-            background: linear-gradient(180deg, rgba(0, 255, 194, 0.05) 0%, var(--bg-secondary) 100%);
-        }
-        .price-card.popular::before {
-            content: 'Most Popular'; position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
-            background: var(--accent-cyan); color: var(--bg-main); padding: 5px 15px; border-radius: 20px;
-            font-weight: 700; font-size: 0.8rem;
-        }
-        .price-title { font-size: 1.5rem; margin-bottom: 20px; }
-        .price-amount { font-size: 3rem; font-weight: 900; margin-bottom: 10px; color: var(--accent-cyan); }
-        .price-amount small { font-size: 1rem; color: var(--text-dim); font-weight: 400;}
-        .price-features { margin: 30px 0; text-align: left; }
-        .price-features li { margin-bottom: 15px; display: flex; align-items: flex-start; }
-        .price-features li i { color: var(--accent-cyan); margin-right: 10px; margin-top: 4px; }
-        footer { background: var(--bg-secondary); padding: 40px 0; text-align: center; margin-top: 100px; border-top: 3px dashed var(--track-color); }
-        .footer-links a { margin: 0 15px; color: var(--text-dim); font-size: 0.9rem;}
+/* Code editor */
+.code-editor {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  font-family: 'JetBrains Mono', monospace;
+}
+.code-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+}
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.code-dot.red { background: #ff5f57; }
+.code-dot.yellow { background: #ffbd2e; }
+.code-dot.green { background: #28c840; }
+.code-filename {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+.code-body {
+  padding: 20px;
+  font-size: 0.82rem;
+  line-height: 1.8;
+  min-height: 360px;
+  position: relative;
+}
+.code-body .line {
+  white-space: pre;
+  opacity: 0;
+  transition: opacity 0.05s;
+}
+.code-body .line.typed { opacity: 1; }
+.code-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--accent);
+  animation: blink 1s step-end infinite;
+  vertical-align: text-bottom;
+}
+@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+.code-keyword { color: #ff79c6; }
+.code-function { color: #50fa7b; }
+.code-string { color: #f1fa8c; }
+.code-comment { color: #6272a4; }
+.code-variable { color: #bd93f9; }
+.code-operator { color: #ff79c6; }
+.code-property { color: #8be9fd; }
+.code-number { color: #bd93f9; }
+.code-type { color: #8be9fd; font-style: italic; }
 
-        @media (max-width: 968px) {
-            h1 { font-size: 2.5rem; }
-            .who-grid, .showcase-layout, .capabilities-grid, .pricing-grid { grid-template-columns: 1fr; gap: 30px;}
-            .diagram-container { flex-direction: column; align-items: center; }
-            .diagram-connector { display: none; }
-            .diagram-step { margin-bottom: 40px; width: 100%;}
-            .train-animation-container { display: none; }
-            .case-study-box { flex-direction: column; text-align: center; }
-        }
-    </style>
+/* Browser window (live demo) */
+.browser-window {
+  background: #1a1a2e;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+/* Windows 11 app chrome */
+.win11-titlebar {
+  height: 32px;
+  background: #1a1a1a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 12px;
+  user-select: none;
+  border-bottom: 1px solid #2e2e2e;
+}
+.win11-title {
+  font-size: 12px;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Segoe UI', 'Plus Jakarta Sans', sans-serif;
+}
+.win11-controls { display: flex; height: 100%; }
+.win11-btn {
+  width: 46px; height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ccc;
+  font-size: 11px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+.win11-btn:hover { background: #333; }
+.win11-close:hover { background: #e81123 !important; color: #fff; }
+.browser-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  overflow: hidden;
+  cursor: none;
+}
+#demoCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Animated cursor overlay */
+.demo-cursor {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+  transition: left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), top 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.demo-cursor svg {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+.cursor-label {
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  margin-top: 2px;
+  box-shadow: 0 2px 6px rgba(255,107,53,0.4);
+  letter-spacing: 0.3px;
+}
+.cursor-click-ring {
+  position: absolute;
+  top: 0; left: 0;
+  width: 20px; height: 20px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.5);
+  pointer-events: none;
+}
+.cursor-click-ring.active {
+  animation: clickRing 0.6s ease-out;
+}
+@keyframes clickRing {
+  0% { opacity: 1; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(2.5); }
+}
+
+/* ============================================
+   CASE STUDY
+   ============================================ */
+.casestudy {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.casestudy-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  margin-top: 50px;
+}
+.casestudy-visual {
+  background: url('https://oryxbot.com/hero.webp') center/cover no-repeat;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.casestudy-visual::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 7, 13, 0.70);
+  border-radius: 16px;
+}
+.casestudy-visual > * { position: relative; z-index: 1; }
+.casestudy-logo {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.casestudy-url {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+.casestudy-stats {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+.casestudy-stat {
+  text-align: center;
+}
+.casestudy-stat .num {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+.casestudy-stat .label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.casestudy-text h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.casestudy-text p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+.casestudy-tags {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.cs-tag {
+  background: rgba(255,107,53,0.08);
+  border: 1px solid rgba(255,107,53,0.2);
+  color: var(--accent);
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* ============================================
+   PRICING
+   ============================================ */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 60px;
+}
+.pricing-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 28px;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s;
+}
+.pricing-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+}
+.pricing-card.featured {
+  border-color: var(--accent);
+  background: linear-gradient(160deg, rgba(255,107,53,0.06), var(--bg-card));
+}
+.pricing-card.featured::before {
+  content: 'POPULAR';
+  position: absolute;
+  top: -12px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #fff;
+  padding: 4px 16px;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.pricing-card .plan-name {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.pricing-card .price {
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+.pricing-card .price-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+.pricing-card .plan-features {
+  text-align: left;
+  margin-bottom: 28px;
+}
+.pricing-card .plan-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.pricing-card .plan-features li::before {
+  content: '✓';
+  color: var(--green);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.pricing-card .plan-btn {
+  width: 100%;
+  padding: 12px 0;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.pricing-card .plan-btn.btn-accent {
+  background: var(--accent);
+  color: #fff;
+}
+.pricing-card .plan-btn.btn-accent:hover {
+  background: var(--accent-dim);
+  transform: translateY(-1px);
+}
+.pricing-card .plan-btn.btn-ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1.5px solid var(--border);
+}
+.pricing-card .plan-btn.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 60px 0 40px;
+  text-align: center;
+}
+.footer-logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+.footer-logo span { color: var(--accent); }
+.footer p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.footer-links {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.footer-links a {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 900px) {
+  .result-grid,
+  .demo-layout,
+  .casestudy-layout {
+    grid-template-columns: 1fr;
+  }
+  .how-steps,
+  .pricing-grid,
+  .ship-steps,
+  .usecases-grid {
+    grid-template-columns: 1fr;
+  }
+  .audience-cards {
+    grid-template-columns: 1fr;
+  }
+  .result-features {
+    grid-template-columns: 1fr;
+  }
+  .nav-links { display: none; }
+  .hero h1 { letter-spacing: -1px; }
+  .diagram-label { display: none; }
+}
+@media (max-width: 600px) {
+  .section { padding: 80px 0; }
+  .hero { padding: 120px 16px 80px; }
+  .hero-buttons { flex-direction: column; align-items: center; }
+}
+
+
+/* ====== register.html ====== */
+:root {
+  --bg-primary: #07070d;
+  --bg-secondary: #0e0e1a;
+  --bg-card: #111122;
+  --accent: #ff6b35;
+  --accent-dim: #cc5529;
+  --accent-glow: rgba(255,107,53,0.25);
+  --gold: #ffd700;
+  --text-primary: #e8e8f0;
+  --text-secondary: #9999b0;
+  --text-muted: #666680;
+  --border: #1e1e35;
+  --border-focus: rgba(255,107,53,0.5);
+  --green: #4ade80;
+  --red: #f87171;
+  --input-bg: #0d0d1e;
+  --input-border: #252540;
+}
+.page-register *, .page-register *::before, .page-register *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+.page-register {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+.page-register .left-panel {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.page-register .left-panel::before {
+  content: '';
+  position: absolute;
+  top: -30%; left: -20%;
+  width: 80%; height: 80%;
+  background: radial-gradient(ellipse, rgba(255,107,53,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.page-register .left-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+}
+.page-register .left-logo {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.page-register .left-logo span { color: var(--accent); }
+.page-register .left-content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.page-register .left-tagline {
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+.page-register .left-tagline .hl { color: var(--accent); font-style: italic; }
+.page-register .left-desc {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 380px;
+  margin-bottom: 36px;
+}
+.page-register .left-perks { display: flex; flex-direction: column; gap: 14px; }
+.page-register .left-perk {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+.page-register .perk-icon {
+  width: 32px; height: 32px;
+  background: rgba(255,107,53,0.1);
+  border: 1px solid rgba(255,107,53,0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.page-register .left-footer {
+  position: relative;
+  z-index: 2;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.page-register .train-stripe {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 24px, transparent 24px, transparent 32px);
+  opacity: 0.4;
+}
+.page-register .right-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  overflow-y: auto;
+}
+.page-register .form-wrap {
+  width: 100%;
+  max-width: 440px;
+}
+.page-register .step-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 36px;
+}
+.page-register .step-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s;
+}
+.page-register .step-dot.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.page-register .step-dot.done {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+.page-register .step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  overflow: hidden;
+  position: relative;
+}
+.page-register .step-line-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 1px;
+  width: 0%;
+  transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+.page-register .step-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-left: 4px;
+  font-weight: 500;
+}
+.page-register .forms-viewport {
+  position: relative;
+  overflow: hidden;
+}
+.page-register .form-slide {
+  width: 100%;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.45s ease;
+  opacity: 1;
+  transform: translateX(0);
+}
+.page-register .form-slide.slide-out-left {
+  transform: translateX(-110%);
+  opacity: 0;
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+}
+.page-register .form-slide.slide-in-right {
+  transform: translateX(110%);
+  opacity: 0;
+  position: absolute;
+  top: 0; left: 0;
+}
+.page-register .form-slide.slide-in-right.slide-active {
+  transform: translateX(0);
+  opacity: 1;
+  position: relative;
+}
+.page-register .form-heading { margin-bottom: 28px; }
+.page-register .form-heading h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.page-register .form-heading p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.page-register .form-heading .step-subtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.page-register .input-group {
+  margin-bottom: 18px;
+}
+.page-register .input-group label {
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 7px;
+  letter-spacing: 0.2px;
+}
+.page-register .input-field {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  appearance: none;
+}
+.page-register .input-field::placeholder { color: var(--text-muted); }
+.page-register .input-field:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(255,107,53,0.08);
+}
+.page-register .input-field.error { border-color: var(--red); }
+.page-register .input-error {
+  font-size: 0.75rem;
+  color: var(--red);
+  margin-top: 5px;
+  display: none;
+}
+.page-register .input-error.visible { display: block; }
+.page-register .input-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 5px;
+}
+.page-register .pw-strength {
+  margin-top: 8px;
+  display: flex;
+  gap: 4px;
+}
+.page-register .pw-bar {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.3s;
+}
+.page-register .pw-bar.weak { background: var(--red); }
+.page-register .pw-bar.medium { background: var(--gold); }
+.page-register .pw-bar.strong { background: var(--green); }
+.page-register select.input-field {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23666680' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  cursor: pointer;
+}
+.page-register select.input-field option { background: #0e0e1a; }
+.page-register .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.page-register .card-logo-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+.page-register .card-logo {
+  height: 24px;
+  padding: 2px 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.page-register .card-logo.visa { color: #1a1fe8; background: #fff; }
+.page-register .card-logo.mc { color: #eb001b; background: #fff; }
+.page-register .card-logo.amex { color: #2e77bc; background: #fff; }
+.page-register .trial-banner {
+  background: rgba(74,222,128,0.06);
+  border: 1px solid rgba(74,222,128,0.2);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.page-register .trial-banner .tb-icon { font-size: 1.1rem; flex-shrink: 0; padding-top: 1px; }
+.page-register .trial-banner .tb-text { flex: 1; }
+.page-register .trial-banner .tb-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 3px;
+}
+.page-register .trial-banner .tb-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.page-register .trial-banner .tb-lock {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.page-register .submit-btn {
+  width: 100%;
+  padding: 14px 0;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(255,107,53,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+.page-register .submit-btn:hover {
+  background: var(--accent-dim);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 28px rgba(255,107,53,0.35);
+}
+.page-register .submit-btn:active { transform: translateY(0); }
+.page-register .submit-btn.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+.page-register .btn-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+.page-register .submit-btn.loading .btn-spinner { display: block; }
+.page-register .submit-btn.loading .btn-text { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.page-register .fine-print {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 16px;
+  line-height: 1.5;
+}
+.page-register .fine-print a { color: var(--accent); text-decoration: none; }
+.page-register .fine-print a:hover { text-decoration: underline; }
+.page-register .divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+.page-register .divider::before, .page-register .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.page-register .success-overlay {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+.page-register .success-overlay.visible { display: flex; }
+.page-register .success-icon {
+  width: 72px; height: 72px;
+  background: rgba(74,222,128,0.1);
+  border: 2px solid var(--green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 24px;
+  animation: popIn 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes popIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.page-register .success-overlay h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.page-register .success-overlay p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  max-width: 340px;
+}
+.page-register .success-overlay .api-key-display {
+  margin-top: 24px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+.page-register .success-overlay .back-link {
+  margin-top: 24px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.page-register .success-overlay .back-link a {
+  color: var(--accent);
+  text-decoration: none;
+}
+@media (max-width: 800px) {.page-register { grid-template-columns: 1fr; grid-template-rows: auto 1fr; overflow: auto; }
+.page-register .left-panel {
+    padding: 24px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    min-height: auto;
+  }
+.page-register .left-content { display: none; }
+.page-register .left-footer { display: none; }
+.page-register .right-panel { padding: 24px; align-items: flex-start; }}
+
+/* ====== login.html ====== */
+:root {
+  --bg-primary: #07070d;
+  --bg-secondary: #0e0e1a;
+  --bg-card: #111122;
+  --accent: #ff6b35;
+  --accent-dim: #cc5529;
+  --accent-glow: rgba(255,107,53,0.25);
+  --gold: #ffd700;
+  --text-primary: #e8e8f0;
+  --text-secondary: #9999b0;
+  --text-muted: #666680;
+  --border: #1e1e35;
+  --border-focus: rgba(255,107,53,0.5);
+  --green: #4ade80;
+  --red: #f87171;
+  --input-bg: #0d0d1e;
+  --input-border: #252540;
+}
+.page-login *, .page-login *::before, .page-login *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+.page-login {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+.page-login .left-panel {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.page-login .left-panel::before {
+  content: '';
+  position: absolute;
+  top: -30%; left: -20%;
+  width: 80%; height: 80%;
+  background: radial-gradient(ellipse, rgba(255,107,53,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.page-login .left-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+}
+.page-login .left-logo {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.page-login .left-logo i { color: var(--accent); }
+.page-login .left-logo span { color: var(--accent); }
+.page-login .left-content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.page-login .left-tagline {
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+.page-login .left-tagline .hl { color: var(--accent); font-style: italic; }
+.page-login .left-desc {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 380px;
+  margin-bottom: 36px;
+}
+.page-login .left-perks { display: flex; flex-direction: column; gap: 14px; }
+.page-login .left-perk {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+.page-login .perk-icon {
+  width: 32px; height: 32px;
+  background: rgba(255,107,53,0.1);
+  border: 1px solid rgba(255,107,53,0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.page-login .left-footer {
+  position: relative;
+  z-index: 2;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.page-login .train-stripe {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 24px, transparent 24px, transparent 32px);
+  opacity: 0.4;
+}
+.page-login .right-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  overflow-y: auto;
+}
+.page-login .form-wrap {
+  width: 100%;
+  max-width: 420px;
+}
+.page-login .form-heading {
+  margin-bottom: 8px;
+}
+.page-login .form-heading h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.page-login .form-heading p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 36px;
+}
+.page-login .form-heading p a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.page-login .form-heading p a:hover { text-decoration: underline; }
+.page-login .error-alert {
+  display: none;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(248,113,113,0.08);
+  border: 1px solid rgba(248,113,113,0.3);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  font-size: 0.88rem;
+  color: var(--red);
+  line-height: 1.5;
+  animation: shake 0.4s ease;
+}
+.page-login .error-alert.show { display: flex; }
+.page-login .error-alert i { margin-top: 1px; flex-shrink: 0; }
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.page-login .field { margin-bottom: 20px; }
+.page-login .field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.page-login .input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.page-login .input-wrap i.input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  pointer-events: none;
+  z-index: 2;
+}
+.page-login .input-wrap input {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  padding: 13px 14px 13px 40px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.page-login .input-wrap input::placeholder { color: var(--text-muted); }
+.page-login .input-wrap input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
+}
+.page-login .input-wrap input.error-field {
+  border-color: rgba(248,113,113,0.5);
+  box-shadow: 0 0 0 3px rgba(248,113,113,0.1);
+}
+.page-login .toggle-pw {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 4px;
+  transition: color 0.2s;
+  z-index: 2;
+}
+.page-login .toggle-pw:hover { color: var(--text-secondary); }
+.page-login .field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.page-login .remember-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+.page-login .remember-label input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.page-login .forgot-link {
+  font-size: 0.85rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.page-login .forgot-link:hover { text-decoration: underline; }
+.page-login .btn-submit {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 15px 24px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(255,107,53,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.page-login .btn-submit:hover { opacity: 0.88; box-shadow: 0 4px 28px rgba(255,107,53,0.5); }
+.page-login .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.page-login .btn-spinner {
+  display: none;
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+.page-login .btn-submit.loading .btn-spinner { display: block; }
+.page-login .btn-submit.loading .btn-text { opacity: 0.7; }
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.page-login .divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+.page-login .divider::before, .page-login .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.page-login .signup-link {
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+.page-login .signup-link a {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+.page-login .signup-link a:hover { text-decoration: underline; }
+@media (max-width: 700px) {.page-login { grid-template-columns: 1fr; }
+.page-login .left-panel { display: none; }}
+
+/* ====== tos.html ====== */
+:root {
+  --bg-primary: #07070d;
+  --bg-secondary: #0e0e1a;
+  --accent: #ff6b35;
+  --text-primary: #e8e8f0;
+  --text-secondary: #9999b0;
+  --text-muted: #666680;
+  --border: #1e1e35;
+}
+.page-tos *, .page-tos *::before, .page-tos *::after { box-sizing: border-box; margin: 0; padding: 0; }
+.page-tos {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.7;
+}
+.page-tos nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 40px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7,7,13,0.9);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.page-tos .nav-logo {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.page-tos .nav-logo i { color: var(--accent); }
+.page-tos .nav-logo span { color: var(--accent); }
+.page-tos .nav-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.page-tos .nav-back:hover { color: var(--text-primary); }
+.page-tos .page-wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 64px 24px 100px;
+}
+.page-tos .page-header {
+  margin-bottom: 52px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--border);
+}
+.page-tos .page-header h1 {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.page-tos .page-header h1 span { color: var(--accent); }
+.page-tos .page-meta {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+}
+.page-tos .page-meta strong { color: var(--text-secondary); }
+.page-tos section {
+  margin-bottom: 40px;
+}
+.page-tos section h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.page-tos section h2 i {
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+.page-tos section p, .page-tos section li {
+  font-size: 0.93rem;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.page-tos section ul {
+  padding-left: 20px;
+}
+.page-tos section li { margin-bottom: 6px; }
+.page-tos a { color: var(--accent); text-decoration: none; }
+.page-tos a:hover { text-decoration: underline; }
+.page-tos .info-box {
+  background: rgba(255,107,53,0.06);
+  border: 1px solid rgba(255,107,53,0.18);
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 36px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.page-tos .info-box i { color: var(--accent); margin-top: 2px; flex-shrink: 0; }
+.page-tos footer {
+  text-align: center;
+  padding: 32px 24px;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.page-tos footer a { color: var(--text-muted); }
+.page-tos footer a:hover { color: var(--text-primary); }
+.page-tos .train-stripe {
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 24px, transparent 24px, transparent 32px);
+  opacity: 0.35;
+}
+
+/* ====== privacy.html ====== */
+:root {
+  --bg-primary: #07070d;
+  --bg-secondary: #0e0e1a;
+  --accent: #ff6b35;
+  --text-primary: #e8e8f0;
+  --text-secondary: #9999b0;
+  --text-muted: #666680;
+  --border: #1e1e35;
+}
+.page-privacy *, .page-privacy *::before, .page-privacy *::after { box-sizing: border-box; margin: 0; padding: 0; }
+.page-privacy {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.7;
+}
+.page-privacy nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 40px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7,7,13,0.9);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.page-privacy .nav-logo {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.page-privacy .nav-logo i { color: var(--accent); }
+.page-privacy .nav-logo span { color: var(--accent); }
+.page-privacy .nav-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.page-privacy .nav-back:hover { color: var(--text-primary); }
+.page-privacy .page-wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 64px 24px 100px;
+}
+.page-privacy .page-header {
+  margin-bottom: 52px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--border);
+}
+.page-privacy .page-header h1 {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.page-privacy .page-header h1 span { color: var(--accent); }
+.page-privacy .page-meta {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+}
+.page-privacy .page-meta strong { color: var(--text-secondary); }
+.page-privacy section { margin-bottom: 40px; }
+.page-privacy section h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.page-privacy section h2 i { color: var(--accent); font-size: 0.9rem; }
+.page-privacy section p, .page-privacy section li {
+  font-size: 0.93rem;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.page-privacy section ul { padding-left: 20px; }
+.page-privacy section li { margin-bottom: 6px; }
+.page-privacy a { color: var(--accent); text-decoration: none; }
+.page-privacy a:hover { text-decoration: underline; }
+.page-privacy .info-box {
+  background: rgba(255,107,53,0.06);
+  border: 1px solid rgba(255,107,53,0.18);
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 36px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.page-privacy .info-box i { color: var(--accent); margin-top: 2px; flex-shrink: 0; }
+.page-privacy .rights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+.page-privacy .right-card {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 0.87rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.page-privacy .right-card i { color: var(--accent); margin-top: 1px; font-size: 0.85rem; flex-shrink: 0; }
+.page-privacy footer {
+  text-align: center;
+  padding: 32px 24px;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.page-privacy footer a { color: var(--text-muted); }
+.page-privacy footer a:hover { color: var(--text-primary); }
+.page-privacy .train-stripe {
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 24px, transparent 24px, transparent 32px);
+  opacity: 0.35;
+}
+
+/* ====== docs.html ====== */
+:root {
+  --bg-primary: #07070d;
+  --bg-secondary: #0e0e1a;
+  --accent: #ff6b35;
+  --accent-glow: rgba(255,107,53,0.25);
+  --text-primary: #e8e8f0;
+  --text-secondary: #9999b0;
+  --text-muted: #666680;
+  --border: #1e1e35;
+  --red: #f87171;
+}
+.page-restricted *, .page-restricted *::before, .page-restricted *::after { box-sizing: border-box; margin: 0; padding: 0; }
+.page-restricted {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.page-restricted::before {
+  content: '';
+  position: fixed;
+  top: -20%; left: 50%; transform: translateX(-50%);
+  width: 60%; height: 60%;
+  background: radial-gradient(ellipse, rgba(255,107,53,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+.page-restricted .bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+.page-restricted nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 40px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7,7,13,0.85);
+  backdrop-filter: blur(12px);
+}
+.page-restricted .nav-logo {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.page-restricted .nav-logo i { color: var(--accent); }
+.page-restricted .nav-logo span { color: var(--accent); }
+.page-restricted .nav-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.page-restricted .nav-back:hover { color: var(--text-primary); }
+.page-restricted .error-container {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 40px 24px;
+  max-width: 600px;
+}
+.page-restricted .error-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(248,113,113,0.1);
+  border: 1px solid rgba(248,113,113,0.25);
+  color: var(--red);
+  border-radius: 100px;
+  padding: 7px 18px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.page-restricted .error-code {
+  font-size: clamp(6rem, 14vw, 9rem);
+  font-weight: 900;
+  letter-spacing: -4px;
+  line-height: 1;
+  color: var(--text-primary);
+  position: relative;
+  margin-bottom: 8px;
+}
+.page-restricted .error-code::before {
+  content: '403';
+  position: absolute;
+  inset: 0;
+  color: var(--accent);
+  filter: blur(32px);
+  opacity: 0.18;
+  z-index: -1;
+}
+.page-restricted .error-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+.page-restricted .error-desc {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+.page-restricted .error-desc strong { color: var(--text-primary); }
+.page-restricted .lock-icon {
+  width: 80px; height: 80px;
+  border-radius: 20px;
+  background: rgba(248,113,113,0.07);
+  border: 1px solid rgba(248,113,113,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  color: var(--red);
+  margin: 0 auto 36px;
+}
+.page-restricted .actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.page-restricted .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 13px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(255,107,53,0.3);
+}
+.page-restricted .btn-primary:hover { opacity: 0.88; box-shadow: 0 4px 28px rgba(255,107,53,0.5); }
+.page-restricted .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.page-restricted .btn-ghost:hover { color: var(--text-primary); border-color: #333355; }
+.page-restricted .train-stripe {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 24px, transparent 24px, transparent 32px);
+  opacity: 0.35;
+}
+
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <div class="logo"><i class="fas fa-train-subway"></i> RailRip</div>
-            <nav>
-                <ul>
-                    <li><a href="#who-is-it-for">Overview</a></li>
-                    <li><a href="#how-it-works">Architecture</a></li>
-                    <li><a href="#pricing">Pricing</a></li>
-                </ul>
-            </nav>
-        </header>
+<div id="page-home" class="spa-page" data-title="RailRip — Anticheat Bypass as a Service">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DM52T5V46X"></script>
 
-        <section id="hero">
-            <div class="track-bg"></div>
-            <div class="hero-content">
-                <h1>Developing cheats shouldn't be <span class="highlight">hard</span>. Enter RailRip.</h1>
-                <p class="subheader">The world's first anticheat bypass as-a-service. A zero-local-footprint API for developers.</p>
-                <div class="cta-group">
-                    <a class="btn btn-primary">Get API Keys</a>
-                    <a class="btn btn-secondary">Read Docs</a>
-                </div>
-            </div>
-            
-            <div class="train-animation-container">
-                <div class="train-track-line"></div>
-                <div class="station">
-                    <i class="fas fa-laptop-code"></i>
-                    <div class="station-label">USER PC</div>
-                </div>
-                <div class="data-train"><i class="fas fa-train"></i></div>
-                <div class="station" style="color: var(--accent-cyan);">
-                    <i class="fas fa-cloud"></i>
-                    <div class="station-label">RAILRIP CLOUD</div>
-                </div>
-            </div>
-        </section>
 
-        <div class="rail-separator"><i class="fas fa-ellipsis-h"></i></div>
+<!-- ========================================
+     TRAIN BANNER
+     ======================================== -->
+<div class="train-banner">
+  <!-- Scenery -->
+  <div class="scenery">
+    <span class="scenery-item" style="left:5%">🌲</span>
+    <span class="scenery-item" style="left:14%">🌿</span>
+    <span class="scenery-item" style="left:28%">🌲</span>
+    <span class="scenery-item" style="left:38%">🏠</span>
+    <span class="scenery-item" style="left:50%">🌲</span>
+    <span class="scenery-item" style="left:55%">🌲</span>
+    <span class="scenery-item" style="left:68%">🌿</span>
+    <span class="scenery-item" style="left:78%">🌲</span>
+    <span class="scenery-item" style="left:88%">🏠</span>
+    <span class="scenery-item" style="left:95%">🌲</span>
+    <!-- Duplicated for seamless loop -->
+    <span class="scenery-item" style="left:105%">🌲</span>
+    <span class="scenery-item" style="left:114%">🌿</span>
+    <span class="scenery-item" style="left:128%">🌲</span>
+    <span class="scenery-item" style="left:138%">🏠</span>
+    <span class="scenery-item" style="left:150%">🌲</span>
+    <span class="scenery-item" style="left:155%">🌲</span>
+    <span class="scenery-item" style="left:168%">🌿</span>
+    <span class="scenery-item" style="left:178%">🌲</span>
+    <span class="scenery-item" style="left:188%">🏠</span>
+    <span class="scenery-item" style="left:195%">🌲</span>
+  </div>
 
-        <section class="section-pad hidden" style="padding-bottom: 0;">
-            <div class="academic-box">
-                <h3><i class="fas fa-graduation-cap"></i> Built on Academic Foundations</h3>
-                [cite_start]<p>RailRip's architecture is inspired by the thesis <em>Exploiting Third-party Software To Bypass Anti-cheat Detection Systems Through Network-driven Development</em> by Klemen Janez Poličar[cite: 10, 11].</p>
-                [cite_start]<p>The research explores the concept of entirely decoupling cheat software from the host computer[cite: 315]. [cite_start]By moving the execution out of bounds of traditional ring-0 anti-cheat scanners, the method inherently voids currently known protection techniques[cite: 316, 227]. [cite_start]While not peer-reviewed, this research forms the theoretical backbone of our remote approach, allowing developers to escape the endless exploit-patch lifecycle[cite: 171, 125].</p>
-            </div>
-        </section>
+  <!-- Tracks -->
+  <div class="train-tracks"></div>
 
-        <section id="who-is-it-for" class="section-pad">
-            <div class="who-grid">
-                <div class="hidden">
-                    <h2><i class="fas fa-cloud-arrow-up" style="color:var(--accent-cyan)"></i> Hosted in the Cloud</h2>
-                    <br>
-                    <p style="font-size: 1.1rem; line-height: 1.6;">RailRip is built for cheat developers who want to decouple their software from the user's machine. Ship your software to <strong>our cloud</strong> (or bring your own hardware). We take care of the rerouting and packet management. You just subscribe to events via our API.</p>
-                </div>
-                <div class="result-box hidden">
-                    <h3><i class="fas fa-shield-check"></i> Zero Local Footprint</h3>
-                    <p><strong>The Result:</strong> The end user doesn't run <em>any</em> illegitimate software on their laptop. [cite_start]The third-party VNC acts as a trojan horse[cite: 357]. All they need is standard VNC software and our auto-configured VPN. [cite_start]Because your logic runs remotely, you drastically reduce the need to patch your cheat when the game updates[cite: 125].</p>
-                </div>
-            </div>
-        </section>
+  <!-- Train -->
+  <div class="train-wrapper">
+    <div class="smoke-container">
+      <div class="smoke-puff"></div>
+      <div class="smoke-puff"></div>
+      <div class="smoke-puff"></div>
+    </div>
+    <div class="train-engine">
+      <div class="train-loco">
+        <div class="train-window"></div>
+        <div class="train-wheel w1"></div>
+        <div class="train-wheel w2"></div>
+      </div>
+      <div class="train-car">
+        <div class="train-wheel w1"></div>
+        <div class="train-wheel w2"></div>
+      </div>
+      <div class="train-car" style="background:#e67e22;">
+        <div class="train-wheel w1"></div>
+        <div class="train-wheel w2"></div>
+      </div>
+      <div class="train-car" style="background:#e74c3c;">
+        <div class="train-wheel w1"></div>
+        <div class="train-wheel w2"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <div class="rail-separator"><i class="fas fa-ellipsis-h"></i></div>
+<!-- ========================================
+     NAV
+     ======================================== -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <span class="logo-icon"><i class="fas fa-train-subway"></i></span>
+      Rail<span>Rip</span>
+    </a>
+    <div class="nav-links">
+      <a href="#how-it-works">How It Works</a>
+      <a href="#use-cases">Use Cases</a>
+      <a href="#demo">Demo</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#restricted" onclick="showPage('restricted');return false">Docs</a>
+      <a href="#login" onclick="showPage('login');return false" style="opacity:0.75">Sign In</a>
+      <a href="#register" onclick="showPage('register');return false" class="nav-cta">Get API Key</a>
+    </div>
+  </div>
+</nav>
 
-        <section id="how-it-works" class="section-pad">
-            <div class="hidden" style="text-align: center; margin-bottom: 40px;">
-                <h2>The Bypass Engine under the Hood</h2>
-                <p class="subheader">We reverse-engineered VNC protocols so you don't have to.</p>
-            </div>
+<!-- ========================================
+     HERO
+     ======================================== -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <i class="fas fa-bolt"></i> Now in Public Beta
+    </div>
+    <h1>
+      Developing cheats<br>shouldn't be <span class="hard">hard</span>
+    </h1>
+    <div class="enter-railrip">Enter RailRip</div>
+    <p class="subheader">
+      World's first <span style="color:var(--accent);font-weight:700;">anticheat bypass as a service</span>.<br>
+      Reverse-engineered VNC protocols. One API. Zero footprint on the end user's machine.
+    </p>
+    <div class="hero-buttons">
+      <button class="btn btn-primary" onclick="document.getElementById('pricing') && document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">
+        Start for Free →
+      </button>
+      <button class="btn btn-outline" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">
+        See How It Works
+      </button>
+    </div>
+  </div>
+</section>
 
-            <div class="diagram-container hidden">
-                <div class="diagram-connector"></div>
-                <div class="diagram-step">
-                    <div class="step-icon"><i class="fas fa-user"></i></div>
-                    <h4>1. The End User</h4>
-                    <p>Runs <strong>only</strong> a standard VNC client + built-in VPN. No shady loaders required on their machine.</p>
-                </div>
-                <div class="diagram-step">
-                    <div class="step-icon"><i class="fas fa-network-wired"></i></div>
-                    <h4>2. RailRip Core</h4>
-                    <p>We handle the complex networking, video stream sending, and route manipulation using our protocols.</p>
-                </div>
-                <div class="diagram-step">
-                    <div class="step-icon"><i class="fas fa-code"></i></div>
-                    <h4>3. Your Software</h4>
-                    <p>Runs in our cloud. Collects game info by subscribing to our API events, and sends input commands back.</p>
-                </div>
-            </div>
-
-            <div class="hidden" style="margin-top: 80px;">
-                <h3 style="text-align: center; margin-bottom: 10px;"><i class="fas fa-unlock-keyhole" style="color:var(--accent-gold)"></i> What We Provide Access To</h3>
-                <p style="text-align: center; color: var(--text-dim); max-width: 600px; margin: 0 auto;">Our API provides raw data access. You use this foundational data to build your own custom capabilities and automation.</p>
-                
-                <div class="capabilities-grid">
-                    <div class="cap-card">
-                        <h4><i class="fas fa-box-open"></i> Raw Packet Access</h4>
-                        [cite_start]<p>We provide access to unencrypted game network packets (via UDP payload extraction [cite: 433]). You can write software to subscribe to these events and sniff the data.</p>
-                    </div>
-                    <div class="cap-card">
-                        <h4><i class="fas fa-video"></i> Video Stream Access</h4>
-                        <p>We stream the VNC image frames directly to your server. You can implement Computer Vision (OpenCV, YOLO) on this raw image stream.</p>
-                    </div>
-                    <div class="cap-card">
-                        <h4><i class="fas fa-keyboard"></i> Input Manipulation API</h4>
-                        <p>Your cheat sends mouse/keyboard instructions to our API. [cite_start]We package them into the VNC protocol and send them securely back to the client[cite: 454].</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="showcase-layout" id="api-showcase">
-                
-                <div class="editor-container hidden">
-                    <div class="editor-header">
-                        <div class="editor-dots">
-                            <div class="editor-dot" style="background:#ff5f56;"></div>
-                            <div class="editor-dot" style="background:#ffbd2e;"></div>
-                            <div class="editor-dot" style="background:#27c93f;"></div>
-                        </div>
-                        <div class="editor-tab">bot_logic.js</div>
-                    </div>
-                    <div class="editor-content" id="typewriter-target">
-                        <span class="cursor-blink"></span>
-                    </div>
-                </div>
-
-                <div class="win11-widget hidden" id="game-widget">
-                    <div class="win11-header">
-                        <div class="win11-title">
-                            <i class="fas fa-gamepad" style="color: #00FFC2;"></i> VNC Game Stream - RailRip
-                        </div>
-                        <div class="win11-controls">
-                            <div class="win11-btn"><i class="fas fa-minus"></i></div>
-                            <div class="win11-btn"><i class="far fa-square"></i></div>
-                            <div class="win11-btn close"><i class="fas fa-times"></i></div>
-                        </div>
-                    </div>
-                    <div class="game-screen" id="game-screen">
-                        <div class="game-target" id="game-target"></div>
-                        <div class="game-player" id="game-player"></div>
-                        <div class="demo-cursor" id="demo-cursor"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-         <section class="section-pad hidden">
-             <div class="case-study-box">
-                <div class="oryx-logo"><i class="fas fa-hippo"></i></div>
-                <div>
-                    <h3>Case Study: <a href="https://oryxbot.com" target="_blank" style="color: var(--accent-cyan); text-decoration: underline;">OryxBot.com</a></h3>
-                    <p>OryxBot utilizes RailRip to create 100% remote automation. They host their bot logic on our machines. By subscribing to our <strong>packet stream API</strong> for state awareness and using our <strong>input manipulation API</strong> to trigger actions, they built a powerful bot that leaves zero footprint on the user's actual gaming rig.</p>
-                </div>
-             </div>
-         </section>
-
-          <div class="rail-separator"><i class="fas fa-ellipsis-h"></i></div>
-
-        <section id="pricing" class="section-pad">
-            <div class="hidden" style="text-align: center;">
-                <h2>Simple, scalable pricing</h2>
-                <p class="subheader">Pay based on API usage.</p>
-            </div>
-            <div class="pricing-grid">
-                <div class="price-card hidden">
-                    <div class="price-title">The Hobo</div>
-                    <div class="price-amount">Free</div>
-                    <ul class="price-features">
-                        <li><i class="fas fa-check"></i> 1,000 requests / hour limit</li>
-                        <li><i class="fas fa-check"></i> Shared Cloud Execution</li>
-                        <li><i class="fas fa-check"></i> API Event Access</li>
-                    </ul>
-                    <a class="btn btn-secondary" style="width: 100%; margin:0;">Start Testing</a>
-                </div>
-                <div class="price-card popular hidden">
-                    <div class="price-title">The Commuter</div>
-                    <div class="price-amount">0.23€ <small>/ 10k reqs</small></div>
-                    <ul class="price-features">
-                        <li><i class="fas fa-check"></i> Pay-as-you-go (Loaded balance)</li>
-                        <li><i class="fas fa-check"></i> Run logic on our cloud</li>
-                        <li><i class="fas fa-check"></i> Or Bring Your Own Hardware</li>
-                        <li><i class="fas fa-check"></i> Full VNC Reversed routing</li>
-                    </ul>
-                    <a class="btn btn-primary" style="width: 100%; margin:0;">Load Balance</a>
-                </div>
-                 <div class="price-card hidden">
-                    <div class="price-title">The Tycoon</div>
-                    <div class="price-amount" style="font-size: 2rem; padding: 12px 0;">Negotiable</div>
-                     <ul class="price-features">
-                        <li><i class="fas fa-check"></i> For high demand clients</li>
-                        <li><i class="fas fa-check"></i> Dedicated infrastructure</li>
-                        <li><i class="fas fa-check"></i> Custom SLA</li>
-                    </ul>
-                    <a class="btn btn-secondary" style="width: 100%; margin:0;">Contact Us</a>
-                </div>
-            </div>
-        </section>
+<!-- ========================================
+     THE RESULT
+     ======================================== -->
+<section class="section" id="the-result">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">The Result</div>
+      <h2 class="section-title">Zero footprint. <span class="highlight">Full control.</span></h2>
+      <p class="section-subtitle">
+        The end user never runs any illegitimate software on their machine.
+        All cheat logic executes in our cloud — completely invisible to any anticheat.
+      </p>
     </div>
 
-    <footer>
-        <div class="logo" style="justify-content: center; margin-bottom: 20px;"><i class="fas fa-train-subway"></i> RailRip</div>
-        <div class="footer-links">
-            <a href="#">API Documentation</a> <a href="#">Terms of Service</a> <a href="#">Privacy Policy</a> <a href="#">Support</a>
+    <div class="result-grid">
+      <div class="result-visual reveal-left">
+        <div class="result-diagram">
+          <div class="diagram-box user-box">
+            <i class="fas fa-desktop"></i> User's Machine
+            <br><small style="color:var(--text-muted);font-weight:400">Game client + TightVNC server + EasyAntiCheat</small>
+          </div>
+          <div class="diagram-arrow-bi">
+            <span class="dab-label">VPN tunnel + VNC input</span>
+          </div>
+          <div class="diagram-box cloud-box">
+            <i class="fas fa-cloud"></i> RailRip Cloud
+            <br><small style="color:var(--text-secondary);font-weight:400">Your cheat software + packet sniffer + TightVNC client</small>
+          </div>
+          <div class="diagram-arrow-bi">
+            <span class="dab-label">Game traffic (rerouted)</span>
+          </div>
+          <div class="diagram-box game-box">
+            <i class="fas fa-globe"></i> Game Server
+            <br><small style="color:var(--text-muted);font-weight:400">All traffic passes through RailRip — fully transparent</small>
+          </div>
         </div>
-        <p style="margin-top: 20px; color: var(--text-dim); font-size: 0.8rem;">© 2023 RailRip Services. For educational and development purposes only.</p>
-    </footer>
+      </div>
+      <div class="reveal-right">
+        <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:16px;">We handle the hard parts</h3>
+        <p style="color:var(--text-secondary);line-height:1.8;margin-bottom:24px;">
+          RailRip provides reverse-engineered networking protocols for VNC software interaction. We manage traffic rerouting, packet management, mouse &amp; keyboard input manipulation, and video stream delivery — so you can focus purely on your cheat logic.
+        </p>
+        <p style="color:var(--text-secondary);line-height:1.8;margin-bottom:32px;">
+          Users can also <strong style="color:var(--text-primary);">bring their own hardware</strong> — in that case, we stream all necessary data directly to their servers, giving full flexibility on deployment.
+        </p>
+        <div class="result-features">
+          <div class="result-feature reveal" style="--i:0">
+            <div class="icon"><i class="fas fa-satellite-dish"></i></div>
+            <h4>Traffic Rerouting</h4>
+            <p>Automatic VPN tunneling and network rerouting for seamless packet flow.</p>
+          </div>
+          <div class="result-feature reveal" style="--i:1">
+            <div class="icon"><i class="fas fa-box-open"></i></div>
+            <h4>Packet Management</h4>
+            <p>Intercept, inspect, and manipulate game network packets in real time.</p>
+          </div>
+          <div class="result-feature reveal" style="--i:2">
+            <div class="icon"><i class="fas fa-mouse"></i></div>
+            <h4>Input Injection</h4>
+            <p>Mouse &amp; keyboard input manipulation sent back to the user's game client.</p>
+          </div>
+          <div class="result-feature reveal" style="--i:3">
+            <div class="icon"><i class="fas fa-video"></i></div>
+            <h4>Video Streaming</h4>
+            <p>Receive the game's video stream for computer vision and analysis.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // --- SCROLL ANIMATIONS ---
-            const hiddenElements = document.querySelectorAll('.hidden');
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('show');
-                    }
-                });
-            }, { threshold: 0.1 });
-            hiddenElements.forEach((el) => observer.observe(el));
+<!-- ========================================
+     HOW IT WORKS
+     ======================================== -->
+<section class="section" id="how-it-works" style="background:var(--bg-secondary);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Build, deploy, <span class="highlight">profit</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">
+        Ship your cheat software to run on our machines. Subscribe to game events via our API.
+        We provide the streams — you provide the logic.
+      </p>
+    </div>
+    <div class="how-steps stagger-children">
+      <div class="how-step reveal" style="--i:0">
+        <div class="step-num">01</div>
+        <h3>Deploy Your Software</h3>
+        <p>
+          Ship your cheat binary or script to run on our cloud machines. It runs on our dedicated infrastructure, completely separated from the game client — never on the end user's device.
+        </p>
+      </div>
+      <div class="how-step reveal" style="--i:1">
+        <div class="step-num">02</div>
+        <h3>Subscribe to Events</h3>
+        <p>
+          Connect to the RailRip API and subscribe to the data streams you need.
+          Our API provides access to all the information your cheat requires.
+        </p>
+        <div class="api-capabilities">
+          <span class="api-tag">Packet Stream</span>
+          <span class="api-tag">Video/Image Stream</span>
+          <span class="api-tag">Audio Stream</span>
+          <span class="api-tag">Input Injection</span>
+        </div>
+      </div>
+      <div class="how-step reveal" style="--i:2">
+        <div class="step-num">03</div>
+        <h3>React &amp; Interact</h3>
+        <p>
+          Process the incoming game data and respond: manipulate packets,
+          inject mouse/keyboard inputs, or send commands back to the game client in real time.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     WHO IS IT FOR
+     ======================================== -->
+<section class="section" id="audience">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Who Is It For</div>
+      <h2 class="section-title">Built for <span class="highlight">cheat developers</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">
+        If you're tired of fighting anticheat updates, RailRip gives you a plug-and-play bypass
+        so you can focus on what you do best — writing cheat logic.
+      </p>
+    </div>
+    <div class="audience-cards">
+      <div class="audience-card reveal-left">
+        <div class="card-icon"><i class="fas fa-code"></i></div>
+        <h3>Cheat Developers</h3>
+        <p>
+          You want a reliable, ready-made anticheat bypass without having to reverse-engineer
+          kernel drivers or worry about signature detection. RailRip handles the entire bypass
+          layer — you just write your cheat against our API. Ship faster, update less.
+        </p>
+      </div>
+      <div class="audience-card reveal-right">
+        <div class="card-icon"><i class="fas fa-plug"></i></div>
+        <h3>Plug-and-Play Integration</h3>
+        <p>
+          No need to maintain your own bypass infrastructure. Our API is straightforward:
+          subscribe to events, process data, send commands. Works with any language
+          that can make HTTP/WebSocket calls.
+        </p>
+        <div class="limitation">
+          <span>⚠️</span>
+          <span>Inherent network delay — latency depends on user's distance to our servers. Best suited for cheats where sub-10ms reaction time isn't critical.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     SHIP TO USERS
+     ======================================== -->
+<section class="section" id="ship-to-users" style="background:var(--bg-secondary);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Ship to Users</div>
+      <h2 class="section-title">Getting your users <span class="highlight">connected</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">
+        Your end users just need a VNC client and an internet connection.
+        We provide open-source installation scripts you can ship alongside your product.
+      </p>
+    </div>
+    <div class="ship-steps stagger-children">
+      <div class="ship-step reveal" style="--i:0">
+        <div class="step-icon"><i class="fas fa-download"></i></div>
+        <h3>Download a VNC Client</h3>
+        <p>
+          Users install any supported VNC client to connect to the cloud session where
+          their game runs.
+        </p>
+        <div class="vnc-badges">
+          <span class="vnc-badge">TeamViewer</span>
+          <span class="vnc-badge">AnyDesk</span>
+          <span class="vnc-badge">TightVNC</span>
+        </div>
+      </div>
+      <div class="ship-step reveal" style="--i:1">
+        <div class="step-icon"><i class="fas fa-shield-halved"></i></div>
+        <h3>Auto-Configure VPN</h3>
+        <p>
+          Windows users are automatically configured with a built-in VPN connection to our servers,
+          rerouting all game traffic transparently.
+        </p>
+      </div>
+      <div class="ship-step reveal" style="--i:2">
+        <div class="step-icon"><i class="fas fa-scroll"></i></div>
+        <h3>Installation Scripts</h3>
+        <p>
+          We provide fully open-source installation scripts that you can ship to your users.
+          They auto-configure the VNC client to connect to our service — inspect and modify them freely.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     USE CASES
+     ======================================== -->
+<section class="section" id="use-cases">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Use Cases</div>
+      <h2 class="section-title">Three sources. <span class="highlight">Endless possibilities.</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">
+        Our API gives you access to three streams of information from the game, and two methods to interact with it. Combine them to build any cheat you can imagine.
+      </p>
+    </div>
+
+    <div class="info-sources">
+      <h3 class="reveal"><i class="fas fa-satellite-dish"></i> Information Sources</h3>
+      <div class="usecases-grid stagger-children">
+        <div class="usecase-card reveal" style="--i:0">
+          <div class="uc-icon"><i class="fas fa-box-open"></i></div>
+          <h3>Network Packets</h3>
+          <p>
+            Capture and analyze unencrypted game network packets. Read player positions,
+            game state, inventory data, and any protocol-level information the game transmits.
+          </p>
+        </div>
+        <div class="usecase-card reveal" style="--i:1">
+          <div class="uc-icon"><i class="fas fa-eye"></i></div>
+          <h3>Video / Image Stream</h3>
+          <p>
+            Receive the game's visual output for computer vision processing. Run object detection,
+            OCR, or any image analysis on the live game feed.
+          </p>
+        </div>
+        <div class="usecase-card reveal" style="--i:2">
+          <div class="uc-icon"><i class="fas fa-volume-high"></i></div>
+          <h3>Audio Stream</h3>
+          <p>
+            Access the game's audio output for sound-based analysis. Detect footsteps,
+            gunshots, voice cues, or any audio event the game produces.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="interaction-methods" style="margin-top:60px;">
+      <h3 class="reveal"><i class="fas fa-gamepad"></i> Interaction Methods</h3>
+      <div class="usecases-grid stagger-children" style="grid-template-columns:1fr 1fr;">
+        <div class="usecase-card reveal" style="--i:0">
+          <div class="uc-icon"><i class="fas fa-paper-plane"></i></div>
+          <h3>Packet Manipulation</h3>
+          <p>
+            Send crafted packets or modify existing game network traffic. Spoof movements,
+            trigger actions, or intercept and alter data before it reaches the server.
+          </p>
+        </div>
+        <div class="usecase-card reveal" style="--i:1">
+          <div class="uc-icon"><i class="fas fa-computer-mouse"></i></div>
+          <h3>Mouse &amp; Keyboard Input</h3>
+          <p>
+            Inject mouse movements, clicks, and keyboard presses that are sent back to the
+            cheat user's game client. Perfect for aimbots, auto-clickers, and automated movement.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     LIVE DEMO + CODE EDITOR
+     ======================================== -->
+<section class="section demo-section" id="demo" style="background:var(--bg-secondary);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Live Demo</div>
+      <h2 class="section-title">See it in <span class="highlight">action</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">
+        Subscribe to game events, detect the player's movement, and inject corrective mouse input — all through the RailRip API.
+      </p>
+    </div>
+    <div class="demo-layout">
+      <!-- Code Editor -->
+      <div class="code-editor reveal-left" id="codeEditor">
+        <div class="code-titlebar">
+          <div class="code-dot red"></div>
+          <div class="code-dot yellow"></div>
+          <div class="code-dot green"></div>
+          <span class="code-filename">cheat.js — RailRip SDK</span>
+        </div>
+        <div class="code-body" id="codeBody">
+        </div>
+      </div>
+
+      <!-- Browser Window / Live Demo -->
+      <div class="browser-window reveal-right" id="browserDemo">
+        <!-- Win11-style title bar (top bar only) -->
+        <div class="win11-titlebar">
+          <div class="win11-title">
+            <i class="fas fa-gamepad" style="color:var(--accent)"></i>
+            Albion Online — game-session.railrip.cloud
+          </div>
+          <div class="win11-controls">
+            <button class="win11-btn" title="Minimize"><i class="fas fa-minus"></i></button>
+            <button class="win11-btn" title="Maximize"><i class="far fa-square"></i></button>
+            <button class="win11-btn win11-close" title="Close"><i class="fas fa-times"></i></button>
+          </div>
+        </div>
+        <div class="browser-canvas-wrap">
+          <canvas id="demoCanvas"></canvas>
+          <div class="demo-cursor" id="demoCursor">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M4 2L20 12L12 14L8 22L4 2Z" fill="white" stroke="black" stroke-width="1"/>
+            </svg>
+            <div class="cursor-click-ring" id="clickRing"></div>
+            <div class="cursor-label">RailRip</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     CASE STUDY
+     ======================================== -->
+<section class="section casestudy" id="case-study">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Case Study</div>
+      <h2 class="section-title">Powering <span class="highlight">oryxbot.com</span></h2>
+    </div>
+    <div class="casestudy-layout">
+      <div class="casestudy-visual reveal-left">
+        <div class="casestudy-logo">OryxBot</div>
+        <div class="casestudy-url"><a href="https://oryxbot.com" target="_blank">oryxbot.com</a></div>
+        <div class="casestudy-stats">
+          <div class="casestudy-stat">
+            <div class="num">24/7</div>
+            <div class="label">Uptime</div>
+          </div>
+          <div class="casestudy-stat">
+            <div class="num">0</div>
+            <div class="label">Detections</div>
+          </div>
+          <div class="casestudy-stat">
+            <div class="num">100%</div>
+            <div class="label">Cloud</div>
+          </div>
+        </div>
+      </div>
+      <div class="casestudy-text reveal-right">
+        <h3>Automated Game Bot — Fully Undetectable</h3>
+        <p>
+          OryxBot is a fully automated game bot built on top of the RailRip platform.
+          It leverages our <strong>packet sniffing</strong> capabilities to read game state,
+          player positions, and item data in real time from the network stream —
+          all without touching the game's memory or files.
+        </p>
+        <p>
+          For interaction, OryxBot uses RailRip's <strong>mouse input injection</strong>
+          to navigate, loot, attack, and perform complex in-game actions. Because the bot logic
+          runs entirely in our cloud and only a legitimate VNC client runs on the user's machine,
+          it has maintained a perfect record against anticheat detection.
+        </p>
+        <div class="casestudy-tags">
+          <span class="cs-tag">Packet Sniffing</span>
+          <span class="cs-tag">Mouse Injection</span>
+          <span class="cs-tag">24/7 Automation</span>
+          <span class="cs-tag">Zero Footprint</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     PRICING
+     ======================================== -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Simple, <span class="highlight">usage-based</span> pricing</h2>
+      <p class="section-subtitle" style="margin:0 auto;">
+        Start free. Scale as you grow. Only pay for what you use.
+      </p>
+    </div>
+    <div class="pricing-grid stagger-children">
+      <!-- Free -->
+      <div class="pricing-card reveal" style="--i:0">
+        <div class="plan-name">Free</div>
+        <div class="price">€0</div>
+        <div class="price-sub">forever</div>
+        <ul class="plan-features">
+          <li>1,000 API requests / hour</li>
+          <li>All data streams included</li>
+          <li>Input injection</li>
+          <li>Community support</li>
+        </ul>
+        <button class="plan-btn btn-ghost" onclick="showPage('register')">Get Started</button>
+      </div>
+      <!-- Standard -->
+      <div class="pricing-card featured reveal" style="--i:1">
+        <div class="plan-name">Standard</div>
+        <div class="price">€0.23</div>
+        <div class="price-sub">per 10,000 requests</div>
+        <ul class="plan-features">
+          <li>Unlimited requests</li>
+          <li>Packet &amp; audio streams</li>
+          <li><strong style="color:var(--accent)">Video stream unlocked ✦</strong></li>
+          <li>Input injection</li>
+          <li>Balance-based billing</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="plan-btn btn-accent" onclick="showPage('register')">Load Balance →</button>
+      </div>
+      <!-- Enterprise -->
+      <div class="pricing-card reveal" style="--i:2">
+        <div class="plan-name">Enterprise</div>
+        <div class="price">Custom</div>
+        <div class="price-sub">negotiable</div>
+        <ul class="plan-features">
+          <li>Volume discounts</li>
+          <li><strong style="color:var(--accent)">Video stream unlocked ✦</strong></li>
+          <li>Dedicated infrastructure</li>
+          <li>Custom SLAs</li>
+          <li>Bring your own hardware</li>
+          <li>Direct engineering support</li>
+        </ul>
+        <button class="plan-btn btn-ghost" onclick="showPage('restricted')">Contact Us</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     FOOTER
+     ======================================== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-logo"><i class="fas fa-train-subway"></i> Rail<span>Rip</span></div>
+    <p>World's first anticheat bypass as a service.</p>
+    <div class="footer-links">
+      <a href="#restricted" onclick="showPage('restricted');return false">Docs</a>
+      <a href="#restricted" onclick="showPage('restricted');return false">API Reference</a>
+      <a href="#restricted" onclick="showPage('restricted');return false">GitHub</a>
+      <a href="#restricted" onclick="showPage('restricted');return false">Discord</a>
+      <a href="#tos" onclick="showPage('tos');return false">Terms of Service</a>
+      <a href="#privacy" onclick="showPage('privacy');return false">Privacy Policy</a>
+      <a href="#restricted" onclick="showPage('restricted');return false">Contact</a>
+    </div>
+    <p style="margin-top:32px;font-size:0.75rem;">© 2026 RailRip. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- ========================================
+     JAVASCRIPT
+     ======================================== -->
+</div>
+
+<div id="page-register" class="spa-page page-register" data-title="Create Account — RailRip" style="display:none">
+<!-- ============================================
+     LEFT PANEL
+     ============================================ -->
+<div class="left-panel">
+  <div class="left-bg-grid"></div>
+  <div class="train-stripe"></div>
+
+  <a href="#home" onclick="showPage('home');return false" class="left-logo">
+    🚂 Rail<span>Rip</span>
+  </a>
+
+  <div class="left-content">
+    <div class="left-tagline">
+      Get started in<br><span class="hl">minutes.</span>
+    </div>
+    <p class="left-desc">
+      Create your free RailRip account and start building anticheat-bypassed cheats today.
+      Your free tier activates immediately.
+    </p>
+    <div class="left-perks">
+      <div class="left-perk">
+        <div class="perk-icon">⚡</div>
+        <span>1,000 free API requests per hour, forever</span>
+      </div>
+      <div class="left-perk">
+        <div class="perk-icon">📦</div>
+        <span>Full packet stream + input injection on free tier</span>
+      </div>
+      <div class="left-perk">
+        <div class="perk-icon">🔒</div>
+        <span>Zero illegitimate software on your users' machines</span>
+      </div>
+      <div class="left-perk">
+        <div class="perk-icon">🚀</div>
+        <span>Scale to standard billing automatically as you grow</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="left-footer">
+    Already have an account? <a href="#login" onclick="showPage('login');return false" style="color:var(--accent);">Sign in</a>
+  </div>
+</div>
+
+<!-- ============================================
+     RIGHT PANEL — FORMS
+     ============================================ -->
+<div class="right-panel">
+  <div class="form-wrap">
+
+    <!-- Step progress indicator -->
+    <div class="step-progress" id="stepProgress">
+      <div class="step-dot active" id="dot1">1</div>
+      <div class="step-line"><div class="step-line-fill" id="stepLineFill"></div></div>
+      <div class="step-dot" id="dot2">2</div>
+      <span class="step-label" id="stepLabel">Account Details</span>
+    </div>
+
+    <!-- Forms viewport -->
+    <div class="forms-viewport" id="formsViewport">
+
+      <!-- STEP 1 — Personal details -->
+      <div class="form-slide" id="step1">
+        <div class="form-heading">
+          <div class="step-subtitle">🚂 Step 1 of 2</div>
+          <h1>Create your account</h1>
+          <p>Create your account to get started.</p>
+        </div>
+
+        <div class="input-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" class="input-field" placeholder="you@example.com" autocomplete="email">
+          <div class="input-error" id="emailError">Please enter a valid email address.</div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="input-field" placeholder="At least 8 characters" autocomplete="new-password">
+          <div class="pw-strength" id="pwStrength">
+            <div class="pw-bar" id="pwBar1"></div>
+            <div class="pw-bar" id="pwBar2"></div>
+            <div class="pw-bar" id="pwBar3"></div>
+            <div class="pw-bar" id="pwBar4"></div>
+          </div>
+          <div class="input-error" id="passwordError">Password must be at least 8 characters.</div>
+        </div>
+
+        <div class="input-group">
+          <label for="userCount">Expected active user count</label>
+          <select id="userCount" class="input-field">
+            <option value="" disabled selected>Select expected users…</option>
+            <option value="1-10">1 – 10 users (hobby / testing)</option>
+            <option value="10-100">10 – 100 users (small release)</option>
+            <option value="100-1000">100 – 1,000 users (growing product)</option>
+            <option value="1000-10000">1,000 – 10,000 users (large deployment)</option>
+            <option value="10000+">10,000+ users (enterprise)</option>
+          </select>
+          <div class="input-hint">Helps us allocate cloud resources for your sessions.</div>
+          <div class="input-error" id="userCountError">Please select an expected user count.</div>
+        </div>
+
+        <div id="clerk-captcha" data-cl-theme="dark" data-cl-size="flexible" style="margin-top:8px;"></div>
+
+        <button class="submit-btn" id="step1Btn" onclick="submitStep1()">
+          <span class="btn-text">Continue →</span>
+          <div class="btn-spinner"></div>
+        </button>
+
+        <div class="input-error" id="step1ServerError" style="margin-top:10px;"></div>
+
+        <p class="fine-print">
+          By continuing you agree to our <a href="#tos" onclick="showPage('tos');return false">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </p>
+      </div>
+
+      <!-- STEP 2 — Card details -->
+      <div class="form-slide slide-in-right" id="step2">
+        <div class="form-heading">
+          <div class="step-subtitle">💳 Step 2 of 2</div>
+          <h1>Add payment details</h1>
+          <p>Your card details are saved for future billing.</p>
+        </div>
+
+        <div class="trial-banner">
+          <div class="tb-icon">✅</div>
+          <div class="tb-text">
+            <div class="tb-title">Account activated</div>
+            <div class="tb-desc">You get 1,000 API requests per hour at no cost. Your card is only charged if you load balance manually.</div>
+            <div class="tb-lock">🔒 Secured with 256-bit TLS encryption</div>
+          </div>
+        </div>
+
+        <div class="card-logo-row">
+          <div class="card-logo visa">VISA</div>
+          <div class="card-logo mc">MC</div>
+          <div class="card-logo amex">AMEX</div>
+          <span style="font-size:0.72rem;color:var(--text-muted);margin-left:4px;">Debit cards accepted</span>
+        </div>
+
+        <div class="input-group">
+          <label for="cardName">Cardholder name</label>
+          <input type="text" id="cardName" class="input-field" placeholder="Name as on card" autocomplete="cc-name">
+          <div class="input-error" id="cardNameError">Please enter the cardholder name.</div>
+        </div>
+
+        <div class="input-group">
+          <label for="cardNum">Card number</label>
+          <input type="text" id="cardNum" class="input-field" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number" inputmode="numeric">
+          <div class="input-error" id="cardNumError">Please enter a valid 16-digit card number.</div>
+        </div>
+
+        <div class="card-row">
+          <div class="input-group">
+            <label for="cardExp">Expiry</label>
+            <input type="text" id="cardExp" class="input-field" placeholder="MM / YY" maxlength="7" autocomplete="cc-exp" inputmode="numeric">
+            <div class="input-error" id="cardExpError">Invalid expiry date.</div>
+          </div>
+          <div class="input-group">
+            <label for="cardCvc">CVC</label>
+            <input type="text" id="cardCvc" class="input-field" placeholder="•••" maxlength="4" autocomplete="cc-csc" inputmode="numeric">
+            <div class="input-error" id="cardCvcError">Invalid CVC.</div>
+          </div>
+        </div>
+
+        <button class="submit-btn" id="step2Btn" onclick="submitStep2()">
+          <span class="btn-text">Register</span>
+          <div class="btn-spinner"></div>
+        </button>
+
+        <p class="fine-print">
+          🔒 Your payment details are encrypted and stored securely. 
+        </p>
+      </div>
+
+    </div><!-- /forms-viewport -->
+
+    <!-- Success overlay -->
+    <div class="success-overlay" id="successOverlay">
+      <div class="success-icon">🎉</div>
+      <h2>You're all set!</h2>
+      <p>Your RailRip account is active. You have 1,000 requests per hour on the free tier.</p>
+      <div class="api-key-display" id="apiKeyDisplay">rr_live_••••••••••••••••</div>
+      <p class="back-link">Head to the <a href="#">developer dashboard →</a></p>
+    </div>
+
+  </div><!-- /form-wrap -->
+</div><!-- /right-panel -->
+</div>
+
+<div id="page-login" class="spa-page page-login" data-title="Sign In — RailRip" style="display:none">
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="left-bg-grid"></div>
+  <a href="#home" onclick="showPage('home');return false" class="left-logo">
+    <i class="fas fa-train-subway"></i>
+    Rail<span>Rip</span>
+  </a>
+  <div class="left-content">
+    <div class="left-tagline">
+      Your cloud.<br>Their <span class="hl">anticheat</span>.<br>Your win.
+    </div>
+    <p class="left-desc">
+      Sign in to manage your API keys, monitor usage, view session logs,
+      and configure your RailRip deployment.
+    </p>
+    <div class="left-perks">
+      <div class="left-perk">
+        <div class="perk-icon"><i class="fas fa-key"></i></div>
+        API key management
+      </div>
+      <div class="left-perk">
+        <div class="perk-icon"><i class="fas fa-chart-bar"></i></div>
+        Real-time session analytics
+      </div>
+      <div class="left-perk">
+        <div class="perk-icon"><i class="fas fa-book"></i></div>
+        Full documentation access
+      </div>
+    </div>
+  </div>
+  <div class="left-footer">
+    &copy; 2025 RailRip &mdash; <a href="#tos" onclick="showPage('tos');return false" style="color:inherit">Terms</a> &middot; <a href="#privacy" onclick="showPage('privacy');return false" style="color:inherit">Privacy</a>
+  </div>
+  <div class="train-stripe"></div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="form-wrap">
+    <div class="form-heading">
+      <h1>Welcome back</h1>
+      <p>Don't have an account? <a href="#register" onclick="showPage('register');return false">Create one free &rarr;</a></p>
+    </div>
+
+    <!-- Error alert (hidden by default) -->
+    <div class="error-alert" id="errorAlert">
+      <i class="fas fa-circle-exclamation"></i>
+      <span>Invalid credentials. Please check your email and password and try again.</span>
+    </div>
+
+    <form id="loginForm" autocomplete="off" novalidate>
+      <div class="field">
+        <label for="email">Email address</label>
+        <div class="input-wrap">
+          <i class="fas fa-envelope input-icon"></i>
+          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" id="password" name="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
+          <button type="button" class="toggle-pw" id="togglePw" title="Toggle password visibility">
+            <i class="fas fa-eye" id="togglePwIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <label class="remember-label">
+          <input type="checkbox" id="remember"> Remember me
+        </label>
+        
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <div class="btn-spinner"></div>
+        <span class="btn-text">Sign In &rarr;</span>
+      </button>
+    </form>
+
+    <div class="divider">or</div>
+    <div class="signup-link">
+      New to RailRip? <a href="#register" onclick="showPage('register');return false">Create a free account</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="page-tos" class="spa-page page-tos" data-title="Terms of Service — RailRip" style="display:none">
+<nav>
+  <a href="#home" onclick="showPage('home');return false" class="nav-logo">
+    <i class="fas fa-train-subway"></i>
+    Rail<span>Rip</span>
+  </a>
+  <a href="#home" onclick="showPage('home');return false" class="nav-back">
+    <i class="fas fa-arrow-left"></i>
+    Back to home
+  </a>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <h1>Terms of <span>Service</span></h1>
+    <div class="page-meta">
+      Effective date: <strong>1 January 2025</strong> &nbsp;&middot;&nbsp; Last updated: <strong>1 June 2025</strong>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <i class="fas fa-circle-info"></i>
+    <div>
+      These Terms govern your use of the RailRip platform and API. By accessing or using our services, you agree to be bound by these Terms. If you do not agree, do not use our services.
+    </div>
+  </div>
+
+  <section>
+    <h2><i class="fas fa-file-contract"></i> 1. Service Description</h2>
+    <p>
+      RailRip ("we", "us", "our") provides an API-based service that enables remote execution of software on our cloud infrastructure, delivered to end users via encrypted VPN and VNC tunnelling technology. The service is intended for software developers and integrators.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-user-check"></i> 2. Eligibility &amp; Account</h2>
+    <p>You must be at least 18 years old and legally capable of entering into a binding contract to use this service. You are responsible for maintaining the confidentiality of your API key and account credentials. You must notify us immediately of any unauthorised use.</p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-circle-xmark"></i> 3. Acceptable Use</h2>
+    <p>You agree not to use RailRip to:</p>
+    <ul>
+      <li>Violate any applicable local, national, or European Union law or regulation;</li>
+      <li>Distribute malicious software or conduct cyberattacks against any third party;</li>
+      <li>Infringe the intellectual property rights of any person or entity;</li>
+      <li>Harass, harm, or threaten any individual;</li>
+      <li>Attempt to reverse-engineer, decompile, or circumvent our infrastructure.</li>
+    </ul>
+    <p>We reserve the right to suspend or terminate your account immediately for any breach of this section.</p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-credit-card"></i> 4. Subscription &amp; Payment</h2>
+    <p>
+      Subscriptions are billed monthly or annually as chosen at registration. All prices are stated in EUR and inclusive of applicable VAT for EU customers. Recurring payments are processed automatically at the start of each billing period. You may cancel your subscription at any time; cancellation takes effect at the end of the current period with no partial refunds unless required by law.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-rotate-left"></i> 5. Refund Policy</h2>
+    <p>
+      Under EU consumer law, if you are a consumer (not purchasing for business purposes) you have a 14-day right of withdrawal from the date of purchase, provided you have not made significant use of the service. Requests must be submitted via our support channel within this period.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-shield-halved"></i> 6. Limitation of Liability</h2>
+    <p>
+      To the maximum extent permitted by applicable law, RailRip shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of, or inability to use, the service. Our total aggregate liability to you shall not exceed the amount paid by you to RailRip in the three months preceding the event giving rise to the claim.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-screwdriver-wrench"></i> 7. Service Availability</h2>
+    <p>
+      We target 99.5% monthly uptime but do not provide a guaranteed SLA on Standard plans. Planned maintenance will be announced at least 24 hours in advance. We reserve the right to modify, suspend, or discontinue any aspect of the service with reasonable notice.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-gavel"></i> 8. Governing Law</h2>
+    <p>
+      These Terms are governed by the laws of the European Union and the member state in which RailRip is registered. Any disputes shall be subject to the exclusive jurisdiction of the competent courts of that member state. EU consumers retain the right to bring proceedings before the courts of their country of domicile and to use the EU Online Dispute Resolution platform at <a href="https://ec.europa.eu/consumers/odr" target="_blank">ec.europa.eu/consumers/odr</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-pen"></i> 9. Amendments</h2>
+    <p>
+      We may update these Terms from time to time. Material changes will be notified by email or via a notice in your dashboard at least 30 days before taking effect. Continued use of the service after the effective date constitutes acceptance.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-envelope"></i> 10. Contact</h2>
+    <p>
+      For questions regarding these Terms please contact us at <a href="mailto:legal@railrip.cloud">legal@railrip.cloud</a>.
+    </p>
+  </section>
+</div>
+
+<footer>
+  <div style="margin-bottom:8px">
+    <a href="#home" onclick="showPage('home');return false">Home</a> &nbsp;&middot;&nbsp;
+    <a href="#privacy" onclick="showPage('privacy');return false">Privacy Policy</a> &nbsp;&middot;&nbsp;
+    <a href="#restricted" onclick="showPage('restricted');return false">Docs</a> &nbsp;&middot;&nbsp;
+    <a href="#register" onclick="showPage('register');return false">Get Started</a>
+  </div>
+  &copy; 2025 RailRip. All rights reserved.
+</footer>
+<div class="train-stripe"></div>
+</div>
+
+<div id="page-privacy" class="spa-page page-privacy" data-title="Privacy Policy — RailRip" style="display:none">
+<nav>
+  <a href="#home" onclick="showPage('home');return false" class="nav-logo">
+    <i class="fas fa-train-subway"></i>
+    Rail<span>Rip</span>
+  </a>
+  <a href="#home" onclick="showPage('home');return false" class="nav-back">
+    <i class="fas fa-arrow-left"></i>
+    Back to home
+  </a>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <h1>Privacy <span>Policy</span></h1>
+    <div class="page-meta">
+      Effective date: <strong>1 January 2025</strong> &nbsp;&middot;&nbsp; Last updated: <strong>1 June 2025</strong>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <i class="fas fa-shield-halved"></i>
+    <div>
+      RailRip is committed to protecting your personal data in accordance with the EU General Data Protection Regulation (GDPR, Regulation (EU) 2016/679). This policy explains what data we collect, why, and your rights.
+    </div>
+  </div>
+
+  <section>
+    <h2><i class="fas fa-building"></i> 1. Data Controller</h2>
+    <p>
+      The data controller responsible for your personal data is RailRip (contact: <a href="mailto:privacy@railrip.cloud">privacy@railrip.cloud</a>). For data protection queries or to exercise your rights, please use this address.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-database"></i> 2. Data We Collect</h2>
+    <p>We collect only the minimum data necessary to provide our service:</p>
+    <ul>
+      <li><strong>Account data</strong> — email address, password hash, plan details, billing address;</li>
+      <li><strong>Payment data</strong> — processed by our PCI-DSS-compliant payment processor; we do not store full card numbers;</li>
+      <li><strong>Usage data</strong> — API call logs, session timestamps, error reports, IP address;</li>
+      <li><strong>Technical data</strong> — browser type, operating system, referrer URL (collected automatically for security and analytics).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-scale-balanced"></i> 3. Legal Basis &amp; Purposes</h2>
+    <p>We process your personal data on the following legal bases:</p>
+    <ul>
+      <li><strong>Contract performance (Art. 6(1)(b) GDPR)</strong> — to provide and operate the RailRip service, process payments, and send transactional emails;</li>
+      <li><strong>Legitimate interests (Art. 6(1)(f) GDPR)</strong> — for fraud prevention, security monitoring, and service improvement;</li>
+      <li><strong>Legal obligation (Art. 6(1)(c) GDPR)</strong> — to comply with tax, accounting, and other legal requirements;</li>
+      <li><strong>Consent (Art. 6(1)(a) GDPR)</strong> — for optional marketing communications you opt in to.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-share-nodes"></i> 4. Data Sharing</h2>
+    <p>
+      We do not sell your personal data. We may share data with trusted third-party processors strictly necessary to operate the service (payment processors, cloud hosting providers, email delivery services). All processors are bound by data processing agreements and operate under adequate data protection guarantees.
+    </p>
+    <p>
+      Where processors are located outside the EEA, appropriate safeguards (such as EU Standard Contractual Clauses) are in place.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-clock-rotate-left"></i> 5. Retention</h2>
+    <p>
+      Account data is retained for the duration of your subscription and for up to 3 years thereafter to comply with legal obligations. Usage logs are retained for 90 days. You may request deletion of your account data at any time (subject to legal retention requirements).
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-user-shield"></i> 6. Your Rights Under GDPR</h2>
+    <p>As a data subject you have the following rights:</p>
+    <div class="rights-grid">
+      <div class="right-card"><i class="fas fa-eye"></i> Right of access to your data</div>
+      <div class="right-card"><i class="fas fa-pen-to-square"></i> Right to rectification</div>
+      <div class="right-card"><i class="fas fa-trash"></i> Right to erasure ("right to be forgotten")</div>
+      <div class="right-card"><i class="fas fa-pause"></i> Right to restriction of processing</div>
+      <div class="right-card"><i class="fas fa-file-export"></i> Right to data portability</div>
+      <div class="right-card"><i class="fas fa-hand"></i> Right to object to processing</div>
+    </div>
+    <p style="margin-top:16px">
+      To exercise any right, contact us at <a href="mailto:privacy@railrip.cloud">privacy@railrip.cloud</a>. We will respond within 30 days. You also have the right to lodge a complaint with your national supervisory authority.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-cookie-bite"></i> 7. Cookies</h2>
+    <p>
+      We use strictly necessary cookies for authentication and session management. No third-party advertising or tracking cookies are used. Analytics cookies (if any) are anonymised and require your consent.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-lock"></i> 8. Security</h2>
+    <p>
+      We implement appropriate technical and organisational measures to protect your data, including TLS encryption in transit, bcrypt password hashing, and regular security audits. No method of transmission over the internet is 100% secure; we cannot guarantee absolute security.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-pen"></i> 9. Changes to This Policy</h2>
+    <p>
+      Material changes will be communicated by email or via your dashboard at least 30 days before taking effect. The latest version is always available at this URL.
+    </p>
+  </section>
+
+  <section>
+    <h2><i class="fas fa-envelope"></i> 10. Contact</h2>
+    <p>
+      For privacy-related queries: <a href="mailto:privacy@railrip.cloud">privacy@railrip.cloud</a>
+    </p>
+  </section>
+</div>
+
+<footer>
+  <div style="margin-bottom:8px">
+    <a href="#home" onclick="showPage('home');return false">Home</a> &nbsp;&middot;&nbsp;
+    <a href="#tos" onclick="showPage('tos');return false">Terms of Service</a> &nbsp;&middot;&nbsp;
+    <a href="#restricted" onclick="showPage('restricted');return false">Docs</a> &nbsp;&middot;&nbsp;
+    <a href="#register" onclick="showPage('register');return false">Get Started</a>
+  </div>
+  &copy; 2025 RailRip. All rights reserved.
+</footer>
+<div class="train-stripe"></div>
+</div>
+
+<div id="page-restricted" class="spa-page page-restricted" data-title="Restricted — RailRip" style="display:none">
+<div class="bg-grid"></div>
+
+<nav>
+  <a href="#home" onclick="showPage('home');return false" class="nav-logo">
+    <i class="fas fa-train-subway"></i>
+    Rail<span>Rip</span>
+  </a>
+  <a href="#home" onclick="showPage('home');return false" class="nav-back">
+    <i class="fas fa-arrow-left"></i>
+    Back to home
+  </a>
+</nav>
+
+<div class="error-container">
+  <div class="error-badge">
+    <i class="fas fa-lock"></i>
+    Restricted Access
+  </div>
+  <div class="lock-icon">
+    <i class="fas fa-lock"></i>
+  </div>
+  <div class="error-code">403</div>
+  <div class="error-title">This page is restricted to paying customers</div>
+  <div class="error-desc">
+    This page is restricted to paying customers. Please upgrade your plan to gain access.
+  </div>
+  <div class="actions">
+    <a href="#register" onclick="showPage('register');return false" class="btn-primary">
+      <i class="fas fa-bolt"></i>
+      Get API Access
+    </a>
+    <a href="#home" onclick="showPage('home');return false" class="btn-ghost">
+      <i class="fas fa-house"></i>
+      Learn More
+    </a>
+  </div>
+</div>
+
+<div class="train-stripe"></div>
+</div>
+
+<script>
+window.RAILRIP_CLERK_PUBLISHABLE_KEY = 'pk_test_YXJyaXZpbmcta3JpbGwtODIuY2xlcmsuYWNjb3VudHMuZGV2JA';
 
 
-            // --- TYPEWRITER EFFECT ---
-            // Note: &nbsp; added for proper indentation rendering
-            const codeLines = [
-                `<span class="sy-comment">// Subscribe to raw network stream</span>`,
-                `<span class="sy-obj">railrip</span>.<span class="sy-prop">PacketReceived</span> <span class="sy-op">+=</span> <span class="sy-prop">ParsePacket</span>;`,
-                ``,
-                `<span class="sy-keyword">function</span> <span class="sy-prop">OnPlayerMovedPacket</span>(<span class="sy-obj">player</span>) {`,
-                `&nbsp;&nbsp;&nbsp;&nbsp;<span class="sy-keyword">const</span> <span class="sy-obj">targetDir</span> <span class="sy-op">=</span> <span class="sy-obj">Bot</span>.<span class="sy-prop">GetWaypoint</span>();`,
-                `&nbsp;&nbsp;&nbsp;&nbsp;`,
-                `&nbsp;&nbsp;&nbsp;&nbsp;<span class="sy-keyword">if</span> (<span class="sy-obj">player</span>.<span class="sy-prop">direction</span> <span class="sy-op">!==</span> <span class="sy-obj">targetDir</span>) {`,
-                `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sy-comment">// Correct path via VNC Injection</span>`,
-                `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sy-obj">railrip</span>.<span class="sy-prop">MoveMouse</span>(<span class="sy-obj">targetDir</span>.<span class="sy-prop">x</span>, <span class="sy-obj">targetDir</span>.<span class="sy-prop">y</span>);`,
-                `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sy-obj">railrip</span>.<span class="sy-prop">Click</span>(<span class="sy-str">'right'</span>);`,
-                `&nbsp;&nbsp;&nbsp;&nbsp;}`,
-                `}`
-            ];
+// ====== home.html ======
 
-            const typeTarget = document.getElementById('typewriter-target');
-            let typeStarted = false;
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-            function startTypewriter() {
-                if (typeStarted) return;
-                typeStarted = true;
-                
-                typeTarget.innerHTML = '<span class="cursor-blink"></span>';
-                let lineIndex = 0;
-                
-                function typeNext() {
-                    if (lineIndex >= codeLines.length) return; 
-                    
-                    const line = codeLines[lineIndex];
-                    typeTarget.innerHTML = typeTarget.innerHTML.replace('<span class="cursor-blink"></span>', '') + 
-                                           `<div>${line}</div>` + 
-                                           '<span class="cursor-blink"></span>';
-                    
-                    lineIndex++;
-                    setTimeout(typeNext, Math.random() * 200 + 100); 
-                }
-                setTimeout(typeNext, 500); 
-            }
-
-            // Trigger Typewriter when section is visible
-            const showcaseObserver = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting) {
-                    startTypewriter();
-                    startGameDemo();
-                }
-            }, { threshold: 0.5 });
-            
-            const showcaseEl = document.getElementById('api-showcase');
-            if(showcaseEl) {
-                showcaseObserver.observe(showcaseEl);
-            }
+  gtag('config', 'G-DM52T5V46X');
 
 
-            // --- GAME WIDGET DEMO ---
-            let gameStarted = false;
-            function startGameDemo() {
-                if (gameStarted) return;
-                gameStarted = true;
+// ============================================
+// Scroll-triggered reveal animations
+// ============================================
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // Once revealed, stop observing
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
 
-                const screen = document.getElementById('game-screen');
-                const player = document.getElementById('game-player');
-                const cursor = document.getElementById('demo-cursor');
-                const targetMark = document.getElementById('game-target');
-                
-                let screenW = screen.clientWidth;
-                let screenH = screen.clientHeight;
-                
-                let playerAngle = 0;
-                let bgX = 0;
-                let bgY = 0;
-                let speed = 2;
-                
-                // Create particles
-                const particles = [];
-                for(let i=0; i<40; i++) {
-                    let p = document.createElement('div');
-                    p.className = 'game-particle';
-                    p.style.left = Math.random() * 100 + '%';
-                    p.style.top = Math.random() * 100 + '%';
-                    screen.appendChild(p);
-                    particles.push({ el: p, x: Math.random() * screenW, y: Math.random() * screenH });
-                }
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => {
+    observer.observe(el);
+  });
+})();
 
-                function gameLoop() {
-                    const rad = (playerAngle - 90) * (Math.PI / 180); 
-                    bgX -= Math.cos(rad) * speed;
-                    bgY -= Math.sin(rad) * speed;
-                    screen.style.backgroundPosition = `${bgX}px ${bgY}px`;
+// ============================================
+// Code typing animation
+// ============================================
+(function() {
+  const codeLines = [
+    { text: '// Subscribe to game events via RailRip API', cls: 'comment' },
+    { text: 'const rr = new RailRip({ apiKey: "your-key" });', parts: [
+      { text: 'const ', cls: 'keyword' },
+      { text: 'rr', cls: 'variable' },
+      { text: ' = ', cls: 'operator' },
+      { text: 'new ', cls: 'keyword' },
+      { text: 'RailRip', cls: 'type' },
+      { text: '({ ', cls: '' },
+      { text: 'apiKey', cls: 'property' },
+      { text: ': ', cls: '' },
+      { text: '"your-key"', cls: 'string' },
+      { text: ' });', cls: '' },
+    ]},
+    { text: '' },
+    { text: '// Define where we want the player to go', cls: 'comment' },
+    { text: 'let targetPos = { x: 400, y: 250 };', parts: [
+      { text: 'let ', cls: 'keyword' },
+      { text: 'targetPos', cls: 'variable' },
+      { text: ' = { ', cls: '' },
+      { text: 'x', cls: 'property' },
+      { text: ': ', cls: '' },
+      { text: '400', cls: 'number' },
+      { text: ', ', cls: '' },
+      { text: 'y', cls: 'property' },
+      { text: ': ', cls: '' },
+      { text: '250', cls: 'number' },
+      { text: ' };', cls: '' },
+    ]},
+    { text: '' },
+    { text: '// Listen for player movement packets', cls: 'comment' },
+    { text: 'rr.on("packet:PlayerMove", (pkt) => {', parts: [
+      { text: 'rr', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'on', cls: 'function' },
+      { text: '(', cls: '' },
+      { text: '"packet:PlayerMove"', cls: 'string' },
+      { text: ', (', cls: '' },
+      { text: 'pkt', cls: 'variable' },
+      { text: ') => {', cls: 'operator' },
+    ]},
+    { text: '  const { x, y, direction } = pkt.player;', parts: [
+      { text: '  ', cls: '' },
+      { text: 'const ', cls: 'keyword' },
+      { text: '{ x, y, direction }', cls: 'variable' },
+      { text: ' = ', cls: 'operator' },
+      { text: 'pkt', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'player', cls: 'property' },
+      { text: ';', cls: '' },
+    ]},
+    { text: '' },
+    { text: '  // If player is heading the wrong way,', cls: 'comment' },
+    { text: '  // inject a mouse click to correct course', cls: 'comment' },
+    { text: '  if (direction !== getDesiredDir(targetPos)) {', parts: [
+      { text: '  ', cls: '' },
+      { text: 'if', cls: 'keyword' },
+      { text: ' (', cls: '' },
+      { text: 'direction', cls: 'variable' },
+      { text: ' !== ', cls: 'operator' },
+      { text: 'getDesiredDir', cls: 'function' },
+      { text: '(', cls: '' },
+      { text: 'targetPos', cls: 'variable' },
+      { text: ')) {', cls: '' },
+    ]},
+    { text: '    rr.injectMouse(targetPos.x, targetPos.y);', parts: [
+      { text: '    ', cls: '' },
+      { text: 'rr', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'injectMouse', cls: 'function' },
+      { text: '(', cls: '' },
+      { text: 'targetPos', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'x', cls: 'property' },
+      { text: ', ', cls: '' },
+      { text: 'targetPos', cls: 'variable' },
+      { text: '.', cls: '' },
+      { text: 'y', cls: 'property' },
+      { text: ');', cls: '' },
+    ]},
+    { text: '  }', cls: '' },
+    { text: '});', cls: '' },
+  ];
 
-                    particles.forEach(p => {
-                        p.x -= Math.cos(rad) * (speed * 1.5);
-                        p.y -= Math.sin(rad) * (speed * 1.5);
-                        
-                        if(p.x < 0) p.x = screenW;
-                        if(p.x > screenW) p.x = 0;
-                        if(p.y < 0) p.y = screenH;
-                        if(p.y > screenH) p.y = 0;
-                        
-                        p.el.style.transform = `translate(${p.x}px, ${p.y}px)`;
-                    });
+  const codeBody = document.getElementById('codeBody');
+  let started = false;
 
-                    requestAnimationFrame(gameLoop);
-                }
-                
-                function executeBotAction() {
-                    screenW = screen.clientWidth;
-                    screenH = screen.clientHeight;
-                    
-                    const targetX = Math.random() * (screenW - 120) + 60;
-                    const targetY = Math.random() * (screenH - 120) + 60;
-                    
-                    cursor.style.left = `${targetX}px`;
-                    cursor.style.top = `${targetY}px`;
-                    
-                    setTimeout(() => {
-                        cursor.classList.add('clicking');
-                        
-                        targetMark.style.left = `${targetX}px`;
-                        targetMark.style.top = `${targetY}px`;
-                        targetMark.classList.add('active');
-                        
-                        const dx = targetX - (screenW/2);
-                        const dy = targetY - (screenH/2);
-                        let angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
-                        
-                        let diff = angle - (playerAngle % 360);
-                        if (diff > 180) diff -= 360;
-                        if (diff < -180) diff += 360;
-                        playerAngle += diff;
-                        
-                        player.style.transform = `translate(-50%, -50%) rotate(${playerAngle}deg)`;
-                        
-                        setTimeout(() => { cursor.classList.remove('clicking'); }, 200);
-                        setTimeout(() => { targetMark.classList.remove('active'); }, 1000);
+  function buildLineHTML(lineData) {
+    if (lineData.parts) {
+      return lineData.parts.map(p => p.cls ? `<span class="code-${p.cls}">${escHtml(p.text)}</span>` : escHtml(p.text)).join('');
+    }
+    if (lineData.cls) {
+      return `<span class="code-${lineData.cls}">${escHtml(lineData.text)}</span>`;
+    }
+    return escHtml(lineData.text);
+  }
 
-                    }, 600); 
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 
-                    setTimeout(executeBotAction, 3000);
-                }
+  // Prepare line elements
+  const lineEls = [];
+  codeLines.forEach((line) => {
+    const div = document.createElement('div');
+    div.className = 'line';
+    div.innerHTML = line.text === '' ? '&nbsp;' : buildLineHTML(line);
+    codeBody.appendChild(div);
+    lineEls.push(div);
+  });
 
-                gameLoop();
-                executeBotAction();
-            }
-        });
-    </script>
+  // Add cursor
+  const cursorEl = document.createElement('span');
+  cursorEl.className = 'code-cursor';
+  cursorEl.innerHTML = '&nbsp;';
 
+  function startTyping() {
+    if (started) return;
+    started = true;
+    let i = 0;
+    function typeLine() {
+      if (i >= lineEls.length) {
+        // Append cursor to last line
+        lineEls[lineEls.length - 1].appendChild(cursorEl);
+        return;
+      }
+      // Remove cursor from previous line
+      if (cursorEl.parentNode) cursorEl.parentNode.removeChild(cursorEl);
+      lineEls[i].classList.add('typed');
+      lineEls[i].appendChild(cursorEl);
+      i++;
+      const delay = codeLines[i-1].text === '' ? 50 : 30 + Math.random() * 60;
+      setTimeout(typeLine, delay);
+    }
+    typeLine();
+  }
+
+  // Observe code editor scroll into view
+  const editorObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        setTimeout(startTyping, 400);
+        editorObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  editorObs.observe(document.getElementById('codeEditor'));
+})();
+
+// ============================================
+// Live Demo Canvas - Top-down game
+// ============================================
+(function() {
+  const canvas = document.getElementById('demoCanvas');
+  const ctx = canvas.getContext('2d');
+  const cursorEl = document.getElementById('demoCursor');
+  const clickRing = document.getElementById('clickRing');
+  const wrap = canvas.parentElement;
+
+  let W, H;
+  function resize() {
+    const rect = wrap.getBoundingClientRect();
+    W = canvas.width = rect.width * window.devicePixelRatio;
+    H = canvas.height = rect.height * window.devicePixelRatio;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const dW = () => W / window.devicePixelRatio;
+  const dH = () => H / window.devicePixelRatio;
+
+  // Player state
+  const player = {
+    x: 0, y: 0, // world position
+    dir: { x: 1, y: 0 },
+    speed: 1.5,
+    size: 16,
+    color: '#60a5fa',
+    eyeAngle: 0,
+  };
+
+  // Particles
+  const particles = [];
+  const MAX_PARTICLES = 80;
+
+  function spawnParticle() {
+    if (particles.length >= MAX_PARTICLES) return;
+    particles.push({
+      x: player.x + (Math.random() - 0.5) * 8,
+      y: player.y + (Math.random() - 0.5) * 8,
+      vx: -player.dir.x * (0.5 + Math.random() * 1),
+      vy: -player.dir.y * (0.5 + Math.random() * 1),
+      life: 1,
+      decay: 0.008 + Math.random() * 0.012,
+      size: 2 + Math.random() * 3,
+      color: Math.random() > 0.5 ? '#4ade80' : '#86efac',
+    });
+  }
+
+  // Grid dots (ground)
+  const gridSpacing = 40;
+
+  // Target direction & cursor animation
+  let targetWorldX = 100;
+  let targetWorldY = 0;
+  let cursorScreenX = dW() / 2 + 80;
+  let cursorScreenY = dH() / 2;
+  let showCursor = false;
+  let animationCycleTime = 0;
+  const DIRECTION_CHANGE_INTERVAL = 3500; // ms
+
+  const directions = [
+    { x: 1, y: 0 },
+    { x: 0.7, y: 0.7 },
+    { x: 0, y: 1 },
+    { x: -0.7, y: 0.7 },
+    { x: -1, y: 0 },
+    { x: -0.7, y: -0.7 },
+    { x: 0, y: -1 },
+    { x: 0.7, y: -0.7 },
+  ];
+  let dirIndex = 0;
+
+  function changeDirection() {
+    dirIndex = (dirIndex + 1) % directions.length;
+    // Skip if same
+    if (directions[dirIndex].x === player.dir.x && directions[dirIndex].y === player.dir.y) {
+      dirIndex = (dirIndex + 1) % directions.length;
+    }
+
+    const newDir = directions[dirIndex];
+    // Calculate cursor position (offset from center)
+    const cx = dW() / 2;
+    const cy = dH() / 2;
+    const offset = 60 + Math.random() * 40;
+    cursorScreenX = cx + newDir.x * offset;
+    cursorScreenY = cy + newDir.y * offset;
+
+    // Show cursor and move
+    showCursor = true;
+    cursorEl.style.left = cursorScreenX + 'px';
+    cursorEl.style.top = cursorScreenY + 'px';
+    cursorEl.style.opacity = '1';
+
+    // Click animation after cursor arrives
+    setTimeout(() => {
+      clickRing.classList.remove('active');
+      void clickRing.offsetWidth;
+      clickRing.classList.add('active');
+
+      // Change player direction
+      setTimeout(() => {
+        player.dir.x = newDir.x;
+        player.dir.y = newDir.y;
+      }, 150);
+    }, 850);
+
+    // Hide cursor after a bit
+    setTimeout(() => {
+      cursorEl.style.opacity = '0';
+      showCursor = false;
+    }, 1800);
+  }
+
+  setInterval(changeDirection, DIRECTION_CHANGE_INTERVAL);
+  // Initial cursor hidden
+  cursorEl.style.opacity = '0';
+
+  // Animation loop
+  let lastTime = 0;
+  function draw(time) {
+    const dt = Math.min(time - lastTime, 50);
+    lastTime = time;
+
+    ctx.save();
+    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+
+    const w = dW();
+    const h = dH();
+
+    // Clear
+    ctx.fillStyle = '#0f1923';
+    ctx.fillRect(0, 0, w, h);
+
+    // Camera follows player - player always at center
+    const camX = player.x - w / 2;
+    const camY = player.y - h / 2;
+
+    // Draw grid dots
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    const startGX = Math.floor(camX / gridSpacing) * gridSpacing;
+    const startGY = Math.floor(camY / gridSpacing) * gridSpacing;
+    for (let gx = startGX; gx < camX + w + gridSpacing; gx += gridSpacing) {
+      for (let gy = startGY; gy < camY + h + gridSpacing; gy += gridSpacing) {
+        const sx = gx - camX;
+        const sy = gy - camY;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Update & draw particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.98;
+      p.vy *= 0.98;
+      p.life -= p.decay;
+      if (p.life <= 0) {
+        particles.splice(i, 1);
+        continue;
+      }
+      const sx = p.x - camX;
+      const sy = p.y - camY;
+      ctx.globalAlpha = p.life * 0.6;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(sx, sy, p.size * p.life, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Move player
+    player.x += player.dir.x * player.speed;
+    player.y += player.dir.y * player.speed;
+
+    // Spawn particles
+    if (Math.random() > 0.3) spawnParticle();
+
+    // Draw player at center
+    const px = w / 2;
+    const py = h / 2;
+
+    // Player shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(px, py + player.size + 3, player.size * 0.9, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Player body
+    ctx.fillStyle = player.color;
+    ctx.beginPath();
+    ctx.arc(px, py, player.size, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Player inner glow
+    const grad = ctx.createRadialGradient(px - 3, py - 4, 0, px, py, player.size);
+    grad.addColorStop(0, 'rgba(255,255,255,0.2)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(px, py, player.size, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Player eyes (looking in direction of movement)
+    const eyeAngle = Math.atan2(player.dir.y, player.dir.x);
+    const eyeDist = 5;
+    const eyeSize = 3.5;
+    const ex1 = px + Math.cos(eyeAngle - 0.5) * eyeDist;
+    const ey1 = py + Math.sin(eyeAngle - 0.5) * eyeDist;
+    const ex2 = px + Math.cos(eyeAngle + 0.5) * eyeDist;
+    const ey2 = py + Math.sin(eyeAngle + 0.5) * eyeDist;
+
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(ex1, ey1, eyeSize, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(ex2, ey2, eyeSize, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pupils
+    const pupilOff = 1.5;
+    ctx.fillStyle = '#1a1a2e';
+    ctx.beginPath();
+    ctx.arc(ex1 + Math.cos(eyeAngle) * pupilOff, ey1 + Math.sin(eyeAngle) * pupilOff, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(ex2 + Math.cos(eyeAngle) * pupilOff, ey2 + Math.sin(eyeAngle) * pupilOff, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Direction indicator (subtle arrow)
+    ctx.strokeStyle = 'rgba(96, 165, 250, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(px + player.dir.x * (player.size + 5), py + player.dir.y * (player.size + 5));
+    ctx.lineTo(px + player.dir.x * (player.size + 25), py + player.dir.y * (player.size + 25));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // HUD overlay
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '10px Inter, sans-serif';
+    ctx.fillText(`pos: (${Math.round(player.x)}, ${Math.round(player.y)})`, 12, 20);
+    ctx.fillText(`dir: (${player.dir.x.toFixed(1)}, ${player.dir.y.toFixed(1)})`, 12, 34);
+
+    // Status indicator
+    ctx.fillStyle = showCursor ? 'rgba(255,107,53,0.8)' : 'rgba(74,222,128,0.8)';
+    ctx.beginPath();
+    ctx.arc(w - 20, 20, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.textAlign = 'right';
+    ctx.fillText(showCursor ? 'CORRECTING' : 'ON TRACK', w - 32, 24);
+    ctx.textAlign = 'left';
+
+    ctx.restore();
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+
+  // Initial direction change
+  setTimeout(changeDirection, 1500);
+})();
+
+// ============================================
+// Windows 11 clock
+// ============================================
+(function() {
+  function updateClock() {
+    const el = document.getElementById('win11Time');
+    if (!el) return;
+    const now = new Date();
+    const h = now.getHours().toString().padStart(2,'0');
+    const m = now.getMinutes().toString().padStart(2,'0');
+    el.textContent = h + ':' + m;
+  }
+  updateClock();
+  setInterval(updateClock, 10000);
+})();
+
+
+// ====== register.html ======
+
+// ============================================
+// Password strength meter
+// ============================================
+document.getElementById('password').addEventListener('input', function() {
+  const val = this.value;
+  const bars = [
+    document.getElementById('pwBar1'),
+    document.getElementById('pwBar2'),
+    document.getElementById('pwBar3'),
+    document.getElementById('pwBar4'),
+  ];
+  bars.forEach(b => { b.className = 'pw-bar'; });
+  if (val.length === 0) return;
+  let strength = 0;
+  if (val.length >= 8) strength++;
+  if (/[A-Z]/.test(val)) strength++;
+  if (/[0-9]/.test(val)) strength++;
+  if (/[^A-Za-z0-9]/.test(val)) strength++;
+  const cls = strength <= 1 ? 'weak' : strength <= 2 ? 'medium' : 'strong';
+  for (let i = 0; i < strength; i++) bars[i].classList.add(cls);
+});
+
+// ============================================
+// Card number formatter
+// ============================================
+document.getElementById('cardNum').addEventListener('input', function() {
+  let val = this.value.replace(/\D/g, '').substring(0, 16);
+  this.value = val.replace(/(.{4})/g, '$1 ').trim();
+});
+document.getElementById('cardExp').addEventListener('input', function() {
+  let val = this.value.replace(/\D/g, '').substring(0, 4);
+  if (val.length >= 3) val = val.substring(0,2) + ' / ' + val.substring(2);
+  this.value = val;
+});
+document.getElementById('cardCvc').addEventListener('input', function() {
+  this.value = this.value.replace(/\D/g, '').substring(0,4);
+});
+
+// ============================================
+// Step 1 validation & transition
+// ============================================
+function showError(inputId, errorId, show) {
+  const inp = document.getElementById(inputId);
+  const err = document.getElementById(errorId);
+  if (show) {
+    inp.classList.add('error');
+    err.classList.add('visible');
+  } else {
+    inp.classList.remove('error');
+    err.classList.remove('visible');
+  }
+}
+
+const CLERK_PUBLISHABLE_KEY = (
+  window.RAILRIP_CLERK_PUBLISHABLE_KEY ||
+  window.CLERK_PUBLISHABLE_KEY ||
+  localStorage.getItem('RAILRIP_CLERK_PUBLISHABLE_KEY') ||
+  ''
+).trim();
+
+let clerkInstance = null;
+let createdClerkUserId = null;
+
+function showStep1ServerError(message) {
+  const err = document.getElementById('step1ServerError');
+  err.textContent = message || '';
+  err.classList.toggle('visible', Boolean(message));
+}
+
+async function getClerkInstance() {
+  if (clerkInstance) return clerkInstance;
+  if (!CLERK_PUBLISHABLE_KEY) {
+    throw new Error('Signup is unavailable right now. Clerk publishable key is missing.');
+  }
+  if (window.location.protocol === 'file:') {
+    throw new Error('Clerk requires an HTTP(S) origin. Serve this SPA via localhost (for example, http://localhost:5500) instead of opening index.html directly.');
+  }
+  const loadScriptIfNeeded = () => new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[data-railrip-clerk="1"]');
+    if (existing) {
+      if (!existing.getAttribute('data-clerk-publishable-key')) {
+        existing.setAttribute('data-clerk-publishable-key', CLERK_PUBLISHABLE_KEY);
+      }
+      if (window.Clerk) {
+        resolve();
+        return;
+      }
+      existing.addEventListener('load', resolve, { once: true });
+      existing.addEventListener('error', () => reject(new Error('Failed to load Clerk SDK.')), { once: true });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js';
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    script.setAttribute('data-railrip-clerk', '1');
+    script.setAttribute('data-clerk-publishable-key', CLERK_PUBLISHABLE_KEY);
+    script.onload = resolve;
+    script.onerror = () => reject(new Error('Failed to load Clerk SDK.'));
+    document.head.appendChild(script);
+  });
+
+  if (!window.Clerk) await loadScriptIfNeeded();
+  if (!window.Clerk) {
+    throw new Error('Clerk SDK is unavailable right now. Please refresh and try again.');
+  }
+
+  await window.Clerk.load();
+  clerkInstance = window.Clerk;
+  return clerkInstance;
+}
+
+async function createClerkUser(email, password, userCount) {
+  const clerk = await getClerkInstance();
+  const result = await clerk.client.signUp.create({
+    emailAddress: email,
+    password,
+    unsafeMetadata: {
+      expectedActiveUsers: userCount,
+    },
+  });
+
+  const emailVerification = result && result.verifications ? result.verifications.email_address : null;
+  const emailNeedsVerification =
+    result &&
+    result.status !== 'complete' &&
+    (
+      (Array.isArray(result.unverifiedFields) && result.unverifiedFields.includes('email_address')) ||
+      (emailVerification && emailVerification.status && emailVerification.status !== 'verified')
+    );
+
+  if (emailNeedsVerification) {
+    await clerk.client.signUp.prepareEmailAddressVerification();
+  }
+
+  if (result && result.status === 'complete') {
+    createdClerkUserId = result.id;
+  }
+
+  return result;
+}
+
+function readClerkError(error) {
+  const first = error && error.errors && error.errors[0] ? error.errors[0] : null;
+  const status = error && (error.status || error.statusCode);
+  const code = String((first && first.code) || '').toLowerCase();
+  const message = (first && (first.longMessage || first.message)) || (error && error.message) || '';
+
+  if (code.includes('captcha') || /captcha|turnstile|bot/i.test(message)) {
+    return 'CAPTCHA verification failed. Please complete the challenge again and retry.';
+  }
+
+  if (status === 401 || /unauthorized|not authorized|forbidden/i.test(message)) {
+    return 'Clerk rejected this request (401). Confirm your publishable key belongs to this Clerk instance and add this site origin to Clerk allowed origins for your environment.';
+  }
+
+  if (/origin|domain|host/i.test(message) && /not allowed|not authorized|invalid/i.test(message)) {
+    return 'This origin is not allowed by Clerk. Add your current app URL to Clerk allowed origins and try again.';
+  }
+
+  if (first && first.longMessage) return first.longMessage;
+  if (first && first.message) return first.message;
+  return error && error.message ? error.message : 'Unable to create your account right now. Please try again.';
+}
+
+function isCaptchaFailure(error) {
+  const first = error && error.errors && error.errors[0] ? error.errors[0] : null;
+  const code = String((first && first.code) || '').toLowerCase();
+  const message = String((first && (first.longMessage || first.message)) || (error && error.message) || '').toLowerCase();
+  const status = error && (error.status || error.statusCode);
+  if (status === 401 || status === 403) return true;
+  return code.includes('captcha') || message.includes('captcha') || message.includes('turnstile') || message.includes('bot') || message.includes('unauthorized');
+}
+
+function focusCaptchaForRetry() {
+  const captcha = document.getElementById('clerk-captcha');
+  if (!captcha) return;
+  captcha.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const previousOutline = captcha.style.outline;
+  const previousOutlineOffset = captcha.style.outlineOffset;
+  captcha.style.outline = '2px solid var(--red)';
+  captcha.style.outlineOffset = '6px';
+  setTimeout(() => {
+    captcha.style.outline = previousOutline;
+    captcha.style.outlineOffset = previousOutlineOffset;
+  }, 1800);
+}
+
+async function submitStep1() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const userCount = document.getElementById('userCount').value;
+  let valid = true;
+  showStep1ServerError('');
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showError('email', 'emailError', true); valid = false;
+  } else { showError('email', 'emailError', false); }
+
+  if (password.length < 8) {
+    showError('password', 'passwordError', true); valid = false;
+  } else { showError('password', 'passwordError', false); }
+
+  if (!userCount) {
+    showError('userCount', 'userCountError', true); valid = false;
+  } else { showError('userCount', 'userCountError', false); }
+
+  if (!valid) return;
+
+  // Loading state
+  const btn = document.getElementById('step1Btn');
+  btn.classList.add('loading');
+
+  try {
+    let signupResult = null;
+    if (!createdClerkUserId) {
+      signupResult = await createClerkUser(email, password, userCount);
+    }
+
+    if (!createdClerkUserId) {
+      btn.classList.remove('loading');
+      const status = signupResult && signupResult.status ? signupResult.status : 'incomplete';
+      showStep1ServerError(`Signup not completed yet (status: ${status}). Please complete verification and try again.`);
+      return;
+    }
+
+    setTimeout(() => {
+      btn.classList.remove('loading');
+      transitionToStep2();
+    }, 500);
+  } catch (error) {
+    btn.classList.remove('loading');
+    if (isCaptchaFailure(error)) {
+      focusCaptchaForRetry();
+      showStep1ServerError('CAPTCHA verification failed. Please complete the challenge again and click Continue.');
+      return;
+    }
+    showStep1ServerError(readClerkError(error));
+  }
+}
+
+function transitionToStep2() {
+  const s1 = document.getElementById('step1');
+  const s2 = document.getElementById('step2');
+  const dot1 = document.getElementById('dot1');
+  const dot2 = document.getElementById('dot2');
+  const fill = document.getElementById('stepLineFill');
+  const label = document.getElementById('stepLabel');
+
+  // Slide out step 1
+  s1.classList.add('slide-out-left');
+
+  // Prepare step 2
+  s2.style.display = 'block';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      s2.classList.add('slide-active');
+    });
+  });
+
+  // Update progress
+  dot1.className = 'step-dot done';
+  dot1.innerHTML = '✓';
+  dot2.className = 'step-dot active';
+  fill.style.width = '100%';
+  label.textContent = 'Payment Details';
+
+  // Update viewport height
+  const viewport = document.getElementById('formsViewport');
+  viewport.style.minHeight = s2.offsetHeight + 'px';
+}
+
+// ============================================
+// Step 2 validation & success
+// ============================================
+async function submitStep2() {
+  const cardName = document.getElementById('cardName').value.trim();
+  const cardNum = document.getElementById('cardNum').value.replace(/\s/g,'');
+  const cardExp = document.getElementById('cardExp').value;
+  const cardCvc = document.getElementById('cardCvc').value;
+  let valid = true;
+
+  if (!cardName) {
+    showError('cardName', 'cardNameError', true); valid = false;
+  } else { showError('cardName', 'cardNameError', false); }
+
+  if (!/^\d{16}$/.test(cardNum)) {
+    showError('cardNum', 'cardNumError', true); valid = false;
+  } else { showError('cardNum', 'cardNumError', false); }
+
+  const expMatch = cardExp.replace(/\s/g,'').match(/^(\d{2})\/(\d{2})$/);
+  if (!expMatch || parseInt(expMatch[1]) > 12 || parseInt(expMatch[1]) < 1) {
+    showError('cardExp', 'cardExpError', true); valid = false;
+  } else { showError('cardExp', 'cardExpError', false); }
+
+  if (!/^\d{3,4}$/.test(cardCvc)) {
+    showError('cardCvc', 'cardCvcError', true); valid = false;
+  } else { showError('cardCvc', 'cardCvcError', false); }
+
+  if (!valid) return;
+
+  // Loading state
+  const btn = document.getElementById('step2Btn');
+  btn.classList.add('loading');
+
+  // Update unsafeMetadata with payment intent flag
+  try {
+    const clerk = await getClerkInstance();
+
+    // Ensure the session from signup is active so clerk.user is available
+    if (!clerk.user && createdClerkUserId) {
+      const sessions = clerk.client && clerk.client.sessions;
+      const activeSession = sessions && sessions.length > 0 ? sessions[sessions.length - 1] : null;
+      if (activeSession) {
+        await clerk.setActive({ session: activeSession.id });
+      }
+    }
+
+    if (clerk.user) {
+      const existing = clerk.user.unsafeMetadata || {};
+      await clerk.user.update({
+        unsafeMetadata: {
+          ...existing,
+          hasSubmittedPaymentIntent: true,
+        },
+      });
+    } else {
+      console.warn('Clerk user not available after session activation; skipping metadata update.');
+    }
+  } catch (metaErr) {
+    console.warn('Failed to update payment intent metadata:', metaErr);
+  }
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    // Show success, hide everything else
+    document.getElementById('stepProgress').style.display = 'none';
+    document.getElementById('formsViewport').style.display = 'none';
+    const overlay = document.getElementById('successOverlay');
+    overlay.classList.add('visible');
+    // Generate fake API key display
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let key = 'rr_live_';
+    for (let i = 0; i < 24; i++) key += chars[Math.floor(Math.random() * chars.length)];
+    document.getElementById('apiKeyDisplay').textContent = key;
+  }, 1200);
+}
+
+
+// ====== login.html ======
+
+// Toggle password visibility
+const togglePw = document.getElementById('togglePw');
+const pwInput = document.getElementById('password');
+const toggleIcon = document.getElementById('togglePwIcon');
+togglePw.addEventListener('click', () => {
+  const isText = pwInput.type === 'text';
+  pwInput.type = isText ? 'password' : 'text';
+  toggleIcon.className = isText ? 'fas fa-eye' : 'fas fa-eye-slash';
+});
+
+// Form submission — always show "invalid credentials" after delay
+const form = document.getElementById('loginForm');
+const submitBtn = document.getElementById('submitBtn');
+const errorAlert = document.getElementById('errorAlert');
+const emailInput = document.getElementById('email');
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  errorAlert.classList.remove('show');
+  emailInput.classList.remove('error-field');
+  pwInput.classList.remove('error-field');
+
+  submitBtn.disabled = true;
+  submitBtn.classList.add('loading');
+  submitBtn.querySelector('.btn-text').textContent = 'Signing in…';
+
+  setTimeout(() => {
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('loading');
+    submitBtn.querySelector('.btn-text').textContent = 'Sign In →';
+    emailInput.classList.add('error-field');
+    pwInput.classList.add('error-field');
+    errorAlert.classList.add('show');
+    errorAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 1100);
+});
+
+
+
+(function() {
+  // ---- Router ----
+  const pages = document.querySelectorAll('.spa-page');
+  const titleMap = {};
+  pages.forEach(p => { titleMap[p.id] = p.dataset.title || 'RailRip'; });
+
+  window.showPage = function(id) {
+    const fullId = 'page-' + id;
+    pages.forEach(p => { p.style.display = p.id === fullId ? '' : 'none'; });
+    document.title = titleMap[fullId] || 'RailRip';
+    history.pushState({ page: id }, '', id === 'home' ? '/' : '#' + id);
+    window.scrollTo(0, 0);
+
+    // Re-fire intersection observers for home page reveals
+    if (id === 'home') {
+      document.querySelectorAll('#page-home .reveal, #page-home .reveal-left, #page-home .reveal-right, #page-home .reveal-scale').forEach(el => {
+        el.classList.remove('visible');
+        revealObserver.observe(el);
+      });
+    }
+  };
+
+  window.addEventListener('popstate', e => {
+    showPage((e.state && e.state.page) || 'home');
+  });
+
+  // Initial routing from URL hash
+  const hash = window.location.hash.replace('#', '');
+  if (hash && document.getElementById('page-' + hash)) {
+    showPage(hash);
+  }
+})();
+
+</script>
 </body>
 </html>

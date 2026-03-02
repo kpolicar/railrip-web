@@ -250,7 +250,7 @@ const router = `
 const indexSrc = fs.readFileSync(path.join(SRC_DIR, 'home.html'), 'utf8');
 let head = between(indexSrc, '<head>', '</head>');
 head = head.replace(/<style>[\s\S]*?<\/style>/gi, ''); // strip inline style (merged separately)
-head = head.replace(/<title>.*?<\/title>/i, '<title>RailRip</title>');
+head = head.replace(/<title>.*?<\/title>/i, '<title>RailRip — Anticheat Bypass as a Service | Game Hack, Exploit &amp; Bot Platform</title>');
 
 // ── assemble ──────────────────────────────────────────────────────────────────
 
